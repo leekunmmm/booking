@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Phòng nghỉ')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<style>
+    .rooms-hero {
+        min-height: 58vh;
+        display: flex; align-items: center; justify-content: center;
+        background:
+            linear-gradient(rgba(10,25,41,0.58), rgba(10,25,41,0.78)),
+            url('https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=1920&q=80') center/cover;
+        color: var(--white);
+        text-align: center;
+        position: relative;
+    }
+    .rooms-hero h1 {
+        font-size: clamp(2.4rem, 5vw, 4.4rem);
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        margin-bottom: 1rem;
+    }
+    .rooms-hero .hero-sub {
+        max-width: 740px;
+        margin: 0 auto;
+        color: rgba(255,255,255,0.82);
+        font-size: 1.05rem;
+    }
+    .rooms-hero .hero-count {
+        margin-top: 1.4rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border: 1px solid rgba(201,169,110,0.35);
+        color: var(--gold);
+        background: rgba(10,25,41,0.2);
+        border-radius: 999px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        font-size: 0.72rem;
+    }
+
+    .filter-panel {
+        margin-top: -42px;
+        position: relative;
+        z-index: 5;
+        background: #fff;
+        border: 1px solid rgba(10,25,41,0.06);
+        border-radius: 14px;
+        box-shadow: var(--shadow-lg);
+        padding: 1.1rem;
+    }
+    .filter-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.6rem;
+        justify-content: center;
+        margin-bottom: 1rem;
+    }
+    .filter-tab {
+        border: 1px solid var(--border);
+        background: #fff;
+        color: var(--navy);
+        padding: 0.58rem 1.05rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-weight: 600;
+        transition: transform .25s ease, box-shadow .25s ease, background .25s ease, color .25s ease, border-color .25s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    .filter-tab:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 22px rgba(10,25,41,0.08);
+        border-color: rgba(201,169,110,0.35);
+    }
+    .filter-tab.active {
+        background: var(--navy);
+        color: #fff;
+        border-color: var(--navy);
+        box-shadow: 0 12px 24px rgba(10,25,41,0.18);
+    }
+    .filter-tab.active::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(120deg, transparent 0%, rgba(255,255,255,0.12) 40%, transparent 80%);
+        animation: chipShine 2.2s infinite;
+    }
+    @keyframes chipShine {
+        0% { transform: translateX(-120%); }
+        100% { transform: translateX(120%); }
+    }
+
+    /* Room card extended */
+    .room-meta {
+        display: flex; gap: 1.25rem;
+        font-size: 0.83rem; color: var(--text-muted);
+        margin-bottom: 0.75rem;
+        font-family: 'Lato', sans-serif;
+        font-weight: 500;
+    }
+    .room-meta span { display: flex; align-items: center; gap: 0.35rem; }
+    .room-meta i { color: var(--gold); }
+
+    .room-card .btn-detail {
+        display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+        width: 100%; padding: 0.7rem;
+        border: 1.5px solid var(--navy);
+        color: var(--navy); border-radius: 4px;
+        font-weight: 500; font-size: 0.82rem;
+        letter-spacing: 0.2px; text-transform: uppercase;
+        transition: all .25s;
+    }
+    .room-card .btn-detail:hover {
+        background: var(--navy); color: var(--gold);
+    }
+
+    .room-card {
+        position: relative;
+        overflow: hidden;
+    }
+    .room-card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(10,25,41,0.03) 100%);
+        pointer-events: none;
+        z-index: 0;
+    }
+    .room-card .card-body {
+        position: relative;
+        z-index: 1;
+    }
+    .room-highlights {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.45rem;
+        margin-bottom: 0.9rem;
+    }
+    .room-highlights span {
+        font-size: 0.76rem;
+        color: var(--text-muted);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+    .room-highlights i { color: var(--gold); }
+
+    /* Empty state */
+    .empty-state {
+        padding: 3.4rem 0; text-align: center;
+    }
+    .empty-icon {
+        width: 80px; height: 80px; border-radius: 50%;
+        background: var(--cream); border: 1px solid var(--border);
+        display: flex; align-items: center; justify-content: center;
+        margin: 0 auto 1.5rem;
+    }
+    .empty-icon i { font-size: 2rem; color: var(--text-muted); }
+
+    /* Active filter badge */
+    .filter-active-badge {
+        display: inline-flex; align-items: center; gap: 0.4rem;
+        background: var(--navy); color: var(--gold);
+        border-radius: 20px; padding: 0.3rem 0.9rem;
+        font-size: 0.78rem; font-weight: 500;
+        letter-spacing: 0.2px;
+    }
+
+    /* Price range input */
+    .price-range-group {
+        display: inline-flex; align-items: center; gap: 0.45rem;
+        background: #f9f7f3;
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        padding: 0.32rem 0.85rem;
+    }
+    .price-input {
+        width: 108px; border: none; background: transparent;
+        font-size: 0.79rem; color: var(--navy);
+        outline: none; text-align: center;
+    }
+    .price-input::placeholder { color: #b0a890; }
+    .price-sep { color: var(--text-muted); font-size: 0.9rem; }
+    .price-btn {
+        background: var(--navy); color: #fff;
+        border: none; border-radius: 999px;
+        padding: 0.28rem 0.95rem; font-size: 0.75rem;
+        font-weight: 600; letter-spacing: 0.06em;
+        text-transform: uppercase; cursor: pointer;
+        transition: background .2s;
+    }
+    .price-btn:hover { background: #163354; }
+
+    /* Pagination */
+    .pagination .page-link {
+        border-color: var(--border);
+        color: var(--navy);
+        font-size: 0.82rem;
+        min-width: 36px; text-align: center;
+        padding: 0.38rem 0.6rem;
+    }
+    .pagination .page-item.active .page-link {
+        background: var(--navy); border-color: var(--navy); color: #fff;
+    }
+    .pagination .page-item.disabled .page-link { color: #c0bdb6; }
+    .pagination .page-link:hover:not(.page-item.active .page-link) {
+        background: var(--cream); border-color: rgba(201,169,110,0.35); color: var(--navy);
+    }
+</style>
+
+<!-- HERO -->
+<section class="rooms-hero">
+    <div class="container">
+        <span class="section-tag">SỰ HOÀN HẢO TRONG TỪNG CHI TIẾT</span>
+        <h1>Bộ sưu tập<br>phòng nghỉ</h1>
+        <p class="hero-sub">
+            Khám phá những không gian nghỉ dưỡng đẳng cấp, được tuyển chọn theo tiêu chuẩn sang trọng và trải nghiệm thực tế.
+        </p>
+        <div class="hero-count">
+            <i class="bi bi-building"></i>
+            <span th:text="${#lists.size(rooms)}">0</span> phòng đang hiển thị
+        </div>
+    </div>
+</section>
+
+<!-- FILTER PANEL -->
+<div class="container">
+    <div class="filter-panel">
+        <!-- Row 1: Room type tabs -->
+        <div class="filter-tabs">
+            <a class="filter-tab" th:classappend="${type == null} ? 'active'"
+               th:href="@{/rooms(sort=${sort}, page=1, minPrice=${minPrice}, maxPrice=${maxPrice})}">Tất cả</a>
+            <a class="filter-tab" th:each="t : ${roomTypes}"
+               th:classappend="${t == type} ? 'active'"
+               th:href="@{/rooms(type=${t.name()}, sort=${sort}, page=1, minPrice=${minPrice}, maxPrice=${maxPrice})}"
+               th:text="${t.displayName}">Deluxe</a>
+        </div>
+        <!-- Row 2: Sort + Price range -->
+        <div class="d-flex flex-wrap gap-3 justify-content-center align-items-center mt-2">
+            <div class="d-flex gap-2">
+                <a class="filter-tab" th:classappend="${sort == 'low'} ? 'active'"
+                   th:href="@{/rooms(type=${type?.name()}, sort='low', page=1, minPrice=${minPrice}, maxPrice=${maxPrice})}">
+                    <i class="bi bi-arrow-up"></i> Giá thấp → cao
+                </a>
+                <a class="filter-tab" th:classappend="${sort != 'low'} ? 'active'"
+                   th:href="@{/rooms(type=${type?.name()}, sort='high', page=1, minPrice=${minPrice}, maxPrice=${maxPrice})}">
+                    <i class="bi bi-arrow-down"></i> Giá cao → thấp
+                </a>
+            </div>
+            <form method="get" action="/rooms" class="d-flex align-items-center gap-2 flex-wrap justify-content-center">
+                <input type="hidden" name="sort" th:value="${sort}">
+                <input type="hidden" name="page" value="1">
+                <input th:if="${type != null}" type="hidden" name="type" th:value="${type.name()}">
+                <div class="price-range-group">
+                    <i class="bi bi-tag" style="color:var(--gold);font-size:0.82rem"></i>
+                    <input type="number" name="minPrice" class="price-input" placeholder="Giá từ" th:value="${minPrice}" min="0" step="100000">
+                    <span class="price-sep">—</span>
+                    <input type="number" name="maxPrice" class="price-input" placeholder="Đến" th:value="${maxPrice}" min="0" step="100000">
+                    <button type="submit" class="price-btn">Lọc</button>
+                </div>
+                <a th:if="${minPrice != null or maxPrice != null}"
+                   th:href="@{/rooms(type=${type?.name()}, sort=${sort}, page=1)}"
+                   class="filter-tab" style="padding:0.38rem 0.75rem;font-size:0.72rem">
+                    <i class="bi bi-x-circle"></i> Bỏ lọc giá
+                </a>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- RESULTS -->
+<div class="container py-4">
+
+    <!-- Header row -->
+    <div class="d-flex justify-content-between align-items-end mb-4 flex-wrap gap-3">
+        <div>
+            <span class="section-tag">Bộ sưu tập phòng</span>
+            <h2 class="mb-0">Khám phá phòng nghỉ</h2>
+            <p class="text-muted mb-0" style="max-width:620px">Các phòng được sắp xếp theo tiêu chuẩn sang trọng, từ hạng cao cấp đến phòng đặc biệt, để khách dễ chọn đúng nhu cầu.</p>
+        </div>
+        <div class="d-flex gap-2 flex-wrap align-items-center">
+            <span class="filter-active-badge" th:if="${minPrice != null or maxPrice != null}">
+                <i class="bi bi-tag"></i>
+                <span th:if="${minPrice != null}" th:text="'Từ ' + ${#numbers.formatInteger(minPrice.intValue(), 0, 'POINT')} + 'đ'"></span>
+                <span th:if="${maxPrice != null}" th:text="'→ ' + ${#numbers.formatInteger(maxPrice.intValue(), 0, 'POINT')} + 'đ'"></span>
+            </span>
+            <span class="filter-active-badge">
+                <i class="bi bi-layers"></i>
+                <span th:text="${#lists.size(rooms)}">0</span> phòng &nbsp;·&nbsp; trang <span th:text="${page}">1</span>/<span th:text="${totalPages}">1</span>
+            </span>
+        </div>
+    </div>
+
+    <!-- Grid -->
+    <div class="row g-3" th:if="${not #lists.isEmpty(rooms)}">
+        <div class="col-lg-4 col-md-6" th:each="room : ${rooms}">
+            <div class="room-card">
+                <div class="room-img-wrap">
+                    <img th:src="${room.firstImage}"
+                         th:alt="${'Phòng ' + room.roomNumber}">
+                    <span class="room-badge"
+                          th:classappend="|badge-${#strings.toLowerCase(room.type.name())}|"
+                          th:text="${room.type.displayName}"></span>
+                    <div class="price-tag">
+                        <span class="accent" th:text="${#numbers.formatInteger(room.pricePerNight, 0, 'POINT')}"></span>
+                        <small> đ/đêm</small>
+                    </div>
+                    <!-- Badge trạng thái -->
+                    <div th:if="${bookedRoomIds != null and bookedRoomIds.contains(room.id)}"
+                         style="position:absolute;top:10px;right:10px;background:rgba(220,53,69,0.92);color:#fff;
+                                font-size:0.7rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;
+                                padding:0.28rem 0.7rem;border-radius:999px;backdrop-filter:blur(4px)">
+                        <i class="bi bi-x-circle me-1"></i>Đã được đặt
+                    </div>
+                    <div th:if="${bookedRoomIds == null or !bookedRoomIds.contains(room.id)}"
+                         style="position:absolute;top:10px;right:10px;background:rgba(25,135,84,0.9);color:#fff;
+                                font-size:0.7rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;
+                                padding:0.28rem 0.7rem;border-radius:999px;backdrop-filter:blur(4px)">
+                        <i class="bi bi-check-circle me-1"></i>Còn trống
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="stars" style="font-weight:500;letter-spacing:2px;color:var(--gold)">★★★★★</div>
+                    <h5 style="font-family:'Lato',sans-serif;font-weight:600;letter-spacing:0.02em">Suite Room - P.<span th:text="${room.roomNumber}"></span></h5>
+                    <div style="font-size:0.84rem;color:var(--text-muted);margin-bottom:0.8rem;letter-spacing:0.04em;text-transform:uppercase">
+                        CHỈ TỪ <strong style="color:var(--gold-deep);font-weight:700" th:text="${#numbers.formatInteger(room.pricePerNight, 0, 'POINT')} + ' đ'"></strong>
+                    </div>
+                    <div class="room-meta mb-2">
+                        <span><i class="bi bi-aspect-ratio"></i><span>85m²</span></span>
+                        <span><i class="bi bi-people"></i><span th:text="${room.capacity}"></span> khách</span>
+                    </div>
+                    <div class="room-highlights">
+                        <span><i class="bi bi-stars"></i> Tiêu chuẩn hạng sang</span>
+                        <span><i class="bi bi-snow"></i> Điều hòa</span>
+                        <span><i class="bi bi-wifi"></i> Wifi tốc độ cao</span>
+                        <span><i class="bi bi-shield-check"></i> Dọn phòng hằng ngày</span>
+                    </div>
+                    <a th:href="@{/rooms/{id}(id=${room.id})}" class="btn-detail">
+                        Chi tiết <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Empty state -->
+    <div class="empty-state" th:if="${#lists.isEmpty(rooms)}">
+        <div class="empty-icon">
+            <i class="bi bi-search"></i>
+        </div>
+        <h4>Không tìm thấy phòng phù hợp</h4>
+        <p class="text-muted mb-4">Thử thay đổi tiêu chuẩn hoặc sắp xếp giá để xem thêm lựa chọn.</p>
+        <a th:href="@{/rooms}" class="btn btn-gold">
+            <i class="bi bi-grid me-2"></i>Xem tất cả phòng
+        </a>
+    </div>
+</div>
+
+<div class="container pb-5">
+    <nav aria-label="Pagination rooms" th:if="${totalPages > 1}">
+        <ul class="pagination justify-content-center gap-1">
+            <li class="page-item" th:classappend="${page <= 1} ? 'disabled'">
+                <a class="page-link rounded-pill px-3"
+                   th:href="@{/rooms(page=${page - 1}, type=${type?.name()}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice})}">
+                    <i class="bi bi-chevron-left"></i>
+                </a>
+            </li>
+            <li class="page-item" th:each="i : ${#numbers.sequence(1, totalPages)}"
+                th:classappend="${i == page} ? 'active'">
+                <a class="page-link rounded-pill"
+                   th:href="@{/rooms(page=${i}, type=${type?.name()}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice})}"
+                   th:text="${i}">1</a>
+            </li>
+            <li class="page-item" th:classappend="${page >= totalPages} ? 'disabled'">
+                <a class="page-link rounded-pill px-3"
+                   th:href="@{/rooms(page=${page + 1}, type=${type?.name()}, sort=${sort}, minPrice=${minPrice}, maxPrice=${maxPrice})}">
+                    <i class="bi bi-chevron-right"></i>
+                </a>
+            </li>
+        </ul>
+    </nav>
+    <p class="text-center text-muted" style="font-size:0.8rem;margin-top:0.5rem" th:if="${totalPages > 1}">
+        Trang <span th:text="${page}"></span> / <span th:text="${totalPages}"></span>
+    </p>
+</div>
+
+<section class="py-5 section-surface">
+    <div class="container text-center">
+        <span class="section-tag">Khách hàng mong muốn</span>
+        <h2>Trải nghiệm đúng tiêu chuẩn bạn cần</h2>
+        <p class="text-muted" style="max-width:720px;margin:0 auto 1.5rem">
+            Chọn hạng phòng, sắp xếp giá và lướt nhanh theo từng trang 20 phòng để tìm đúng không gian nghỉ dưỡng phù hợp nhất.
+        </p>
+    </div>
+</section>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

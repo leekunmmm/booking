@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Liên hệ')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<style>
+    /* ---- HERO ---- */
+    .contact-hero {
+        min-height: 54vh;
+        display: flex; align-items: center; justify-content: center;
+        background:
+            linear-gradient(rgba(10,25,41,0.62), rgba(10,25,41,0.74)),
+            url('https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1920&q=80') center/cover;
+        color: #fff; text-align: center;
+    }
+    .contact-hero h1 {
+        font-size: clamp(2.2rem, 5vw, 4rem);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 1.25rem;
+    }
+    .contact-hero p {
+        font-family: 'Lato', sans-serif;
+        font-weight: 400;
+        font-size: 1.05rem;
+        opacity: 0.85;
+        max-width: 520px;
+        margin: 0 auto;
+        line-height: 1.9;
+    }
+
+    /* ---- INFO CARDS ---- */
+    .info-card {
+        background: #fff;
+        border-radius: 3px;
+        box-shadow: 0 12px 40px rgba(10,25,41,0.12);
+        padding: 2.5rem 1.75rem;
+        text-align: center;
+        height: 100%;
+        transition: transform .3s, box-shadow .3s;
+    }
+    .info-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 24px 56px rgba(10,25,41,0.16);
+    }
+    .info-icon {
+        width: 64px; height: 64px; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        margin: 0 auto 1.5rem;
+    }
+    .info-icon i { font-size: 1.6rem; }
+    .info-card h5 {
+        font-size: 1rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--navy);
+        margin-bottom: 1rem;
+    }
+    .info-card p, .info-card a {
+        font-family: 'Lato', sans-serif;
+        font-weight: 400;
+        font-size: 0.95rem;
+        color: var(--text-muted);
+        line-height: 2;
+        display: block;
+        margin: 0;
+    }
+    .info-card a:hover { color: var(--gold-deep); }
+
+    /* ---- FORM ---- */
+    .contact-card {
+        background: #fff;
+        border-radius: 3px;
+        box-shadow: 0 12px 40px rgba(10,25,41,0.1);
+        padding: 3rem;
+    }
+    .form-field {
+        margin-bottom: 2rem;
+    }
+    .form-field label {
+        display: block;
+        font-family: 'Lato', sans-serif;
+        font-weight: 700;
+        font-size: 0.68rem;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        margin-bottom: 0.5rem;
+    }
+    .form-field input,
+    .form-field select,
+    .form-field textarea {
+        width: 100%;
+        border: none;
+        border-bottom: 1.5px solid var(--border);
+        border-radius: 0;
+        background: transparent;
+        padding: 0.6rem 0;
+        font-family: 'Lato', sans-serif;
+        font-weight: 400;
+        font-size: 1rem;
+        color: var(--text);
+        outline: none;
+        transition: border-color .2s;
+        appearance: none;
+        -webkit-appearance: none;
+    }
+    .form-field select {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b7280' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.5rem center;
+        padding-right: 2rem;
+        cursor: pointer;
+    }
+    .form-field input:focus,
+    .form-field select:focus,
+    .form-field textarea:focus {
+        border-bottom-color: var(--gold);
+    }
+    .form-field textarea { resize: none; line-height: 1.8; }
+
+    /* ---- HOURS ---- */
+    .hours-row {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid var(--border);
+        font-size: 0.9rem;
+    }
+    .hours-row:last-child { border-bottom: none; }
+    .hours-row .label {
+        font-weight: 300;
+        color: var(--text-muted);
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+    }
+    .hours-row .val {
+        font-family: 'Playfair Display', serif;
+        font-size: 0.9rem;
+        color: var(--navy);
+    }
+
+    /* ---- SOCIAL ---- */
+    .social-btn {
+        display: inline-flex; align-items: center; gap: 0.6rem;
+        border: 1px solid rgba(201,169,110,0.4);
+        color: rgba(255,255,255,0.8);
+        padding: 0.65rem 1.5rem;
+        border-radius: 2px;
+        font-family: 'Lato', sans-serif;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        text-decoration: none;
+        transition: all .25s;
+    }
+    .social-btn:hover {
+        background: var(--gold);
+        border-color: var(--gold);
+        color: var(--navy);
+    }
+    .social-btn i { font-size: 1.1rem; }
+</style>
+
+<!-- HERO -->
+<section class="contact-hero">
+    <div>
+        <span class="section-tag">Liên hệ</span>
+        <h1>Luôn lắng<br>nghe bạn</h1>
+        <p>Đội ngũ hỗ trợ của chúng tôi luôn sẵn sàng 24/7.<br>Hãy liên hệ để được tư vấn tận tình nhất.</p>
+    </div>
+</section>
+
+<!-- INFO CARDS (float up from hero) -->
+<div class="container" style="margin-top:-52px; position:relative; z-index:5; margin-bottom:5rem;">
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="info-card">
+                <div class="info-icon" style="background:var(--navy)">
+                    <i class="bi bi-geo-alt-fill" style="color:var(--gold)"></i>
+                </div>
+                <h5>Địa chỉ</h5>
+                <p>123 Đường Trần Hưng Đạo<br>Phường Bến Nghé, Quận 1<br>TP. Hồ Chí Minh, Việt Nam</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="info-card">
+                <div class="info-icon" style="background:var(--navy)">
+                    <i class="bi bi-telephone-fill" style="color:var(--gold)"></i>
+                </div>
+                <h5>Điện thoại</h5>
+                <a href="tel:+842812345678">(+84) 28 1234 5678</a>
+                <a href="tel:+842887654321">(+84) 28 8765 4321</a>
+                <p style="font-size:0.78rem;margin-top:0.5rem;opacity:0.7">Hỗ trợ 24 / 7</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="info-card">
+                <div class="info-icon" style="background:var(--navy)">
+                    <i class="bi bi-envelope-fill" style="color:var(--gold)"></i>
+                </div>
+                <h5>Email</h5>
+                <a href="mailto:info@luxehaven.vn">info@luxehaven.vn</a>
+                <a href="mailto:booking@luxehaven.vn">booking@luxehaven.vn</a>
+                <p style="font-size:0.78rem;margin-top:0.5rem;opacity:0.7">Phản hồi trong 2 giờ</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- FORM + MAP -->
+<section class="py-0 pb-5">
+    <div class="container">
+        <div class="row g-5">
+
+            <!-- LEFT: FORM -->
+            <div class="col-lg-6">
+                <span class="section-tag">Gửi tin nhắn</span>
+                <h2 class="mb-4">Chúng tôi muốn<br>nghe từ bạn</h2>
+                <div class="contact-card">
+                    <div id="successMsg" class="alert alert-success mb-4" style="display:none">
+                        <i class="bi bi-check-circle me-2"></i>
+                        Cảm ơn bạn! Chúng tôi sẽ liên hệ lại trong vòng 2 giờ.
+                    </div>
+                    <form id="contactForm" onsubmit="handleSubmit(event)" novalidate>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-field">
+                                    <label>Họ và tên *</label>
+                                    <input type="text" placeholder="Nguyễn Văn A" required>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-field">
+                                    <label>Điện thoại</label>
+                                    <input type="tel" placeholder="0901 234 567">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-field">
+                            <label>Email *</label>
+                            <input type="email" placeholder="email@example.com" required>
+                        </div>
+                        <div class="form-field">
+                            <label>Chủ đề</label>
+                            <select>
+                                <option value="" disabled selected>Chọn chủ đề...</option>
+                                <option>Đặt phòng & Tư vấn</option>
+                                <option>Dịch vụ khách sạn</option>
+                                <option>Sự kiện & Hội nghị</option>
+                                <option>Phản hồi & Góp ý</option>
+                                <option>Khác</option>
+                            </select>
+                        </div>
+                        <div class="form-field">
+                            <label>Nội dung *</label>
+                            <textarea rows="5" placeholder="Nhập nội dung tin nhắn..." required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-gold w-100" style="padding:1rem">
+                            <i class="bi bi-send me-2"></i>Gửi yêu cầu ngay
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- RIGHT: MAP + HOURS -->
+            <div class="col-lg-6">
+                <span class="section-tag">Vị trí</span>
+                <h2 class="mb-4">Tìm chúng tôi</h2>
+
+                <!-- Map -->
+                <div style="border-radius:3px;overflow:hidden;box-shadow:0 12px 40px rgba(10,25,41,0.12);margin-bottom:2rem;height:300px;">
+                    <iframe style="width:100%;height:100%;border:none;"
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.4546256537516!2d106.69743431533414!3d10.77608176233556!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752f3a3a9b5dd7%3A0x29e80b59c4e9dfd5!2zVHLhuqduIEjGsG5nIMSQ4bqhbywgUXXhuq1uIDEsIFRow6BuaCBwaOG7kSBI4buTIENow60gTWluaCwgVmnhu4d0IE5hbQ!5e0!3m2!1svi!2s!4v1619000000000!5m2!1svi!2s"
+                        allowfullscreen loading="lazy">
+                    </iframe>
+                </div>
+
+                <!-- Hours -->
+                <div class="contact-card" style="padding:2rem">
+                    <div style="font-family:'Playfair Display',serif;font-size:1rem;letter-spacing:0.05em;margin-bottom:1.25rem;color:var(--navy)">
+                        <i class="bi bi-clock me-2" style="color:var(--gold)"></i>Giờ hoạt động
+                    </div>
+                    <div class="hours-row">
+                        <span class="label">Lễ tân</span>
+                        <span class="val">24 / 7</span>
+                    </div>
+                    <div class="hours-row">
+                        <span class="label">Nhà hàng The Imperial</span>
+                        <span class="val">06:00 – 23:00</span>
+                    </div>
+                    <div class="hours-row">
+                        <span class="label">Serenity Spa</span>
+                        <span class="val">08:00 – 22:00</span>
+                    </div>
+                    <div class="hours-row">
+                        <span class="label">Sky Pool & Bar</span>
+                        <span class="val">07:00 – 22:00</span>
+                    </div>
+                    <div class="hours-row">
+                        <span class="label">Hỗ trợ khách hàng</span>
+                        <span class="val">24 / 7</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+<script>
+function handleSubmit(e) {
+    e.preventDefault();
+    const form = e.target;
+    const required = form.querySelectorAll('[required]');
+    let valid = true;
+    required.forEach(el => { if (!el.value.trim()) { el.style.borderBottomColor = '#c0392b'; valid = false; }
+                              else { el.style.borderBottomColor = ''; } });
+    if (!valid) return;
+    form.reset();
+    document.getElementById('successMsg').style.display = 'block';
+    window.scrollTo({top: document.getElementById('successMsg').getBoundingClientRect().top + window.scrollY - 100, behavior: 'smooth'});
+    setTimeout(() => document.getElementById('successMsg').style.display = 'none', 6000);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pip --version)",
+      "Bash(pandoc --version)",
+      "Bash(./mvnw.cmd -q test)",
+      "Bash(./mvnw.cmd test *)",
+      "Bash(rm -f booking.db)",
+      "Bash(./mvnw.cmd spring-boot:run)",
+      "Bash(curl -s -o /tmp/home.html -w \"HTTP %{http_code} | %{size_download} bytes\\\\n\" http://localhost:8080/)",
+      "Bash(curl -s -o /tmp/rooms.html -w \"HTTP %{http_code} | %{size_download} bytes\\\\n\" http://localhost:8080/rooms)",
+      "Bash(curl -s -o /tmp/login.html -w \"HTTP %{http_code} | %{size_download} bytes\\\\n\" http://localhost:8080/login)",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code} → %{redirect_url}\\\\n\" http://localhost:8080/admin)",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code} → %{redirect_url}\\\\n\" http://localhost:8080/my-bookings)",
+      "Bash(curl -s -c /tmp/cookies.txt -d \"username=customer1&password=pass123\" -o /dev/null -w \"Login HTTP %{http_code} → %{redirect_url}\\\\n\" http://localhost:8080/login)",
+      "Bash(curl -s -b /tmp/cookies.txt -o /tmp/mybook.html -w \"/my-bookings HTTP %{http_code} | %{size_download} bytes\\\\n\" http://localhost:8080/my-bookings)",
+      "Bash(./mvnw.cmd clean *)",
+      "Bash(netstat -ano)",
+      "Bash(taskkill //F //PID 34528)",
+      "WebFetch(domain:sunrise-hotel-booking.vercel.app)",
+      "Bash(python3 -c ' *)",
+      "Bash(./mvnw.cmd spring-boot:run -q)",
+      "Bash(./mvnw.cmd compile *)",
+      "PowerShell(netstat -ano)",
+      "Bash(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080__TRACKED_VAR__)",
+      "Bash(curl -s http://localhost:8080/)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8080/admin/vouchers -L --max-redirs 0)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:8080/rooms/1)",
+      "Bash(curl -s http://localhost:8080/rooms/1)",
+      "Bash(curl -s -c /tmp/cookie.txt -d \"username=admin&password=admin123\" http://localhost:8080/login -L)",
+      "Bash(curl -s -c /tmp/cookie.txt -b /tmp/cookie.txt http://localhost:8080/admin -L)",
+      "Bash(curl -s -b /tmp/cookie.txt http://localhost:8080/admin/vouchers)"
+    ]
+  }
+}

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Voucher')}"></head>
+<body>
+<div th:replace="~{fragments/layout :: admin-navbar}"></div>
+
+<div class="admin-layout">
+    <div th:replace="~{fragments/layout :: admin-sidebar}"></div>
+
+    <div class="admin-content">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <span class="section-tag">Admin</span>
+                <h2 class="mb-0">Quản lý Voucher</h2>
+            </div>
+            <a th:href="@{/admin/vouchers/new}" class="btn btn-gold">
+                <i class="bi bi-plus-circle me-2"></i>Tạo voucher mới
+            </a>
+        </div>
+
+        <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
+        <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+
+        <!-- Filter -->
+        <div class="bg-white p-3 rounded mb-4" style="box-shadow:var(--shadow-sm)">
+            <form th:action="@{/admin/vouchers}" method="get" class="row g-2 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label small fw-600 mb-1">Tìm mã voucher</label>
+                    <input type="text" name="search" class="form-control"
+                           placeholder="Nhập mã voucher"
+                           th:value="${filterSearch}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-600 mb-1">Trạng thái</label>
+                    <select name="active" class="form-select">
+                        <option value="">Tất cả</option>
+                        <option value="true"  th:selected="${'true'  == filterActive}">Đang hoạt động</option>
+                        <option value="false" th:selected="${'false' == filterActive}">Hết hiệu lực</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-600 mb-1">Hạng áp dụng</label>
+                    <select name="tier" class="form-select">
+                        <option value="">Tất cả hạng</option>
+                        <option th:each="t : ${memberTiers}"
+                                th:value="${t.name()}"
+                                th:text="${t.displayName}"
+                                th:selected="${t.name() == filterTier}"></option>
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex gap-2">
+                    <button class="btn btn-gold" type="submit">
+                        <i class="bi bi-funnel me-1"></i>Lọc
+                    </button>
+                    <a th:href="@{/admin/vouchers}" class="btn btn-outline-secondary">Xoá lọc</a>
+                </div>
+            </form>
+        </div>
+
+        <div class="table-luxury table-responsive">
+            <table class="table mb-0 align-middle">
+                <thead>
+                <tr>
+                    <th>Mã voucher</th>
+                    <th class="text-center">Giảm giá</th>
+                    <th class="text-center">Hết hạn</th>
+                    <th class="text-center">Đã dùng / Tổng</th>
+                    <th class="text-center">Áp dụng cho</th>
+                    <th class="text-center">Trạng thái</th>
+                    <th class="text-end">Thao tác</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="v : ${vouchers}">
+                    <td>
+                        <span class="badge fs-6" style="background:var(--navy);color:var(--gold);letter-spacing:1px"
+                              th:text="${v.code}"></span>
+                    </td>
+                    <td class="text-center">
+                        <strong style="color:var(--gold-deep);font-size:1.1rem"
+                                th:text="${v.discountPercent} + '%'"></strong>
+                    </td>
+                    <td class="text-center">
+                        <span th:if="${v.validUntil != null}" th:text="${#temporals.format(v.validUntil, 'dd/MM/yyyy')}"></span>
+                        <span th:if="${v.validUntil == null}" class="text-muted">Không giới hạn</span>
+                    </td>
+                    <td class="text-center">
+                        <span th:text="${v.usedCount}"></span>
+                        <span class="text-muted"> / </span>
+                        <span th:text="${v.maxUses}"></span>
+                    </td>
+                    <td class="text-center">
+                        <span th:if="${v.targetTier == null}"       class="small text-muted">All members</span>
+                        <span th:if="${v.targetTier == 'BRONZE'}"  class="status-badge" style="background:#cd7f32;color:#fff;font-size:0.7rem">Bronze</span>
+                        <span th:if="${v.targetTier == 'SILVER'}"  class="status-badge" style="background:#a8a9ad;color:#fff;font-size:0.7rem">Silver</span>
+                        <span th:if="${v.targetTier == 'GOLD'}"    class="status-badge" style="background:#c9a96e;color:#0a1929;font-size:0.7rem">Gold</span>
+                        <span th:if="${v.targetTier == 'DIAMOND'}" class="status-badge" style="background:#2980b9;color:#fff;font-size:0.7rem">Diamond</span>
+                        <span th:if="${v.targetTier == 'VIP'}"     class="status-badge" style="background:#6c3483;color:#fff;font-size:0.7rem">VIP</span>
+                    </td>
+                    <td class="text-center">
+                        <span th:if="${v.usable}" class="status-badge status-completed">Đang hoạt động</span>
+                        <span th:if="${!v.usable}" class="status-badge status-cancelled">Hết hiệu lực</span>
+                    </td>
+                    <td class="text-end">
+                        <a th:href="@{/admin/vouchers/{id}/edit(id=${v.id})}"
+                           class="btn btn-sm btn-navy me-1">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <form th:action="@{/admin/vouchers/{id}/delete(id=${v.id})}" method="post"
+                              class="d-inline"
+                              onsubmit="return confirm('Xoá voucher này?');">
+                            <button class="btn btn-sm btn-outline-danger">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="text-center py-5" th:if="${#lists.isEmpty(vouchers)}">
+            <i class="bi bi-ticket-perforated fs-1 mb-3 text-muted"></i>
+            <h5>Chưa có voucher nào</h5>
+            <a th:href="@{/admin/vouchers/new}" class="btn btn-gold mt-2">Tạo voucher đầu tiên</a>
+        </div>
+    </div>
+</div>
+
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

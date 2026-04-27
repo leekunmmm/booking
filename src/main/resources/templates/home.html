@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Trang chủ')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<!-- HERO -->
+<section class="hero">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8">
+                <span class="section-tag">Chào mừng đến LuxeHaven</span>
+                <h1>Trải nghiệm <span class="gold-accent">sang trọng</span><br>đích thực</h1>
+                <p class="lead mb-4">Khách sạn sang trọng với dịch vụ đẳng cấp quốc tế. Mỗi phòng là một không gian nghỉ dưỡng riêng biệt dành riêng cho bạn.</p>
+                <a th:href="@{/rooms}" class="btn btn-gold me-3">Xem phòng nghỉ</a>
+                <a href="#featured" class="btn btn-outline-gold">Khám phá</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SEARCH BAR -->
+<div class="container">
+    <div class="search-bar">
+        <form th:action="@{/rooms}" method="get" class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label>Ngày nhận phòng</label>
+                <input type="date" name="checkIn" class="form-control">
+            </div>
+            <div class="col-md-3">
+                <label>Ngày trả phòng</label>
+                <input type="date" name="checkOut" class="form-control">
+            </div>
+            <div class="col-md-3">
+                <label>Loại phòng</label>
+                <select name="type" class="form-select">
+                    <option value="">Tất cả loại phòng</option>
+                    <option th:each="t : ${roomTypes}" th:value="${t.name()}" th:text="${t.displayName}"></option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button class="btn btn-gold w-100" type="submit">
+                    <i class="bi bi-search me-2"></i>Tìm phòng trống
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- FEATURED ROOMS -->
+<section class="py-5" id="featured">
+    <div class="container">
+        <div class="text-center mb-5">
+            <span class="section-tag">Phòng nghỉ</span>
+            <h2>Phòng nổi bật</h2>
+            <div class="section-divider"></div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6" th:each="room : ${rooms}">
+                <div class="room-card">
+                    <div class="room-img-wrap">
+                        <img th:src="${room.firstImage}" alt="room" th:alt="${'Phòng ' + room.roomNumber}">
+                        <span class="room-badge"
+                              th:classappend="|badge-${#strings.toLowerCase(room.type.name())}|"
+                              th:text="${room.type.displayName}"></span>
+                        <div class="price-tag">
+                            <span class="accent" th:text="${#numbers.formatInteger(room.pricePerNight, 0, 'POINT')}"></span>
+                            <small> VND/đêm</small>
+                        </div>
+                        <div th:if="${bookedRoomIds != null and bookedRoomIds.contains(room.id)}"
+                             style="position:absolute;top:10px;right:10px;background:rgba(220,53,69,0.92);color:#fff;
+                                    font-size:0.7rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;
+                                    padding:0.28rem 0.7rem;border-radius:999px;backdrop-filter:blur(4px)">
+                            <i class="bi bi-x-circle me-1"></i>Đã được đặt
+                        </div>
+                        <div th:if="${bookedRoomIds == null or !bookedRoomIds.contains(room.id)}"
+                             style="position:absolute;top:10px;right:10px;background:rgba(25,135,84,0.9);color:#fff;
+                                    font-size:0.7rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;
+                                    padding:0.28rem 0.7rem;border-radius:999px;backdrop-filter:blur(4px)">
+                            <i class="bi bi-check-circle me-1"></i>Còn trống
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="stars">★★★★★</div>
+                        <h5>Phòng <span th:text="${room.roomNumber}"></span></h5>
+                        <p class="amenities">
+                            <i class="bi bi-people"></i> <span th:text="${room.capacity}"></span> khách
+                            <span class="sep">·</span>
+                            <i class="bi bi-wifi"></i> Wi-Fi
+                            <span class="sep">·</span>
+                            <i class="bi bi-snow"></i> Điều hoà
+                        </p>
+                        <p class="text-muted small mb-3" th:text="${#strings.abbreviate(room.description, 80)}"></p>
+                        <a th:href="@{/rooms/{id}(id=${room.id})}" class="btn btn-outline-gold w-100">
+                            Xem chi tiết &amp; Đặt phòng
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-5" th:if="${not #lists.isEmpty(rooms)}">
+            <a th:href="@{/rooms}" class="btn btn-gold">
+                <i class="bi bi-grid me-2"></i>Xem tất cả phòng
+            </a>
+        </div>
+        <div class="text-center py-5" th:if="${#lists.isEmpty(rooms)}">
+            <p class="text-muted">Chưa có phòng nào.</p>
+        </div>
+    </div>
+</section>
+
+<!-- VOUCHERS -->
+<section class="py-5 section-surface" id="vouchers" th:if="${not #lists.isEmpty(vouchers)}">
+    <div class="container">
+        <div class="text-center mb-5">
+            <span class="section-tag">Ưu đãi</span>
+            <h2>Voucher đang áp dụng</h2>
+            <div class="section-divider"></div>
+            <p class="text-muted" style="max-width:520px;margin:0 auto">Sao chép mã và nhập khi đặt phòng để nhận ưu đãi ngay.</p>
+        </div>
+
+        <div class="row g-4 justify-content-center">
+            <div class="col-lg-4 col-md-6" th:each="v : ${vouchers}">
+                <div class="voucher-ticket">
+                    <!-- notch deco -->
+                    <div class="voucher-notch voucher-notch-left"></div>
+                    <div class="voucher-notch voucher-notch-right"></div>
+
+                    <div class="voucher-top">
+                        <div class="voucher-percent">
+                            <span th:text="${v.discountPercent}">10</span>%
+                            <small>GIẢM</small>
+                        </div>
+                        <div class="voucher-meta">
+                            <div class="voucher-code-label">Mã voucher</div>
+                            <div class="voucher-code" th:text="${v.code}">CODE123</div>
+                            <div class="voucher-tier" th:if="${v.targetTier != null}">
+                                <i class="bi bi-star-fill me-1" style="font-size:0.65rem"></i>
+                                <span th:text="${v.targetTier == 'BRONZE'  ? 'Hạng Bronze'  :
+                                               (v.targetTier == 'SILVER'  ? 'Hạng Silver'  :
+                                               (v.targetTier == 'GOLD'    ? 'Hạng Gold'    :
+                                               (v.targetTier == 'DIAMOND' ? 'Hạng Diamond' : 'Hạng VIP')))}">Hạng</span>
+                            </div>
+                            <div class="voucher-tier" th:if="${v.targetTier == null}">
+                                <i class="bi bi-people-fill me-1" style="font-size:0.65rem"></i>Tất cả khách hàng
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="voucher-divider">
+                        <span></span>
+                    </div>
+
+                    <div class="voucher-bottom">
+                        <div class="voucher-expiry">
+                            <i class="bi bi-clock me-1"></i>
+                            <span th:if="${v.validUntil != null}"
+                                  th:text="'HSD: ' + ${#temporals.format(v.validUntil, 'dd/MM/yyyy')}">HSD</span>
+                            <span th:if="${v.validUntil == null}">Không giới hạn</span>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button class="btn-copy-voucher"
+                                    th:data-code="${v.code}"
+                                    onclick="copyVoucher(this)">
+                                <i class="bi bi-clipboard me-1"></i>Sao chép
+                            </button>
+                            <!-- Đã đăng nhập: nút lưu -->
+                            <button th:if="${currentUser != null}"
+                                    class="btn-save-voucher"
+                                    th:data-id="${v.id}"
+                                    onclick="saveVoucher(this)">
+                                <i class="bi bi-bookmark me-1"></i>Lưu
+                            </button>
+                            <!-- Chưa đăng nhập: link đến login -->
+                            <a th:if="${currentUser == null}"
+                               th:href="@{/login}"
+                               class="btn-save-voucher">
+                                <i class="bi bi-bookmark me-1"></i>Lưu
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+.voucher-ticket {
+    position: relative;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(10,25,41,0.10);
+    overflow: visible;
+    border: 1px solid rgba(201,169,110,0.18);
+}
+.voucher-notch {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 22px; height: 22px;
+    background: var(--cream);
+    border-radius: 50%;
+    border: 1px solid rgba(201,169,110,0.18);
+    z-index: 2;
+}
+.voucher-notch-left  { left: -11px; }
+.voucher-notch-right { right: -11px; }
+.voucher-top {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    padding: 1.5rem 1.75rem 1.25rem;
+}
+.voucher-percent {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 72px; height: 72px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--navy), #102a43);
+    color: var(--gold);
+    font-family: 'Lato', sans-serif;
+    font-weight: 800;
+    font-size: 1.5rem;
+    line-height: 1;
+    flex-shrink: 0;
+}
+.voucher-percent small {
+    font-size: 0.55rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: rgba(201,169,110,0.8);
+    margin-top: 2px;
+}
+.voucher-meta { flex: 1; min-width: 0; }
+.voucher-code-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 0.2rem;
+}
+.voucher-code {
+    font-family: 'Lato', monospace;
+    font-size: 1.25rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: var(--navy);
+    text-transform: uppercase;
+}
+.voucher-tier {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--gold-deep);
+    margin-top: 0.3rem;
+    letter-spacing: 0.3px;
+}
+.voucher-divider {
+    margin: 0 1.25rem;
+    border-top: 2px dashed rgba(201,169,110,0.25);
+}
+.voucher-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.9rem 1.75rem 1.25rem;
+}
+.voucher-expiry {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+.btn-copy-voucher {
+    background: linear-gradient(135deg, var(--gold), var(--gold-deep));
+    color: var(--navy);
+    border: none;
+    border-radius: 20px;
+    padding: 0.35rem 1rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: opacity .2s, transform .15s;
+}
+.btn-copy-voucher:hover { opacity: .88; transform: translateY(-1px); }
+.btn-copy-voucher.copied {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+.btn-save-voucher {
+    display: inline-flex; align-items: center;
+    background: transparent;
+    border: 1.5px solid var(--gold);
+    color: var(--gold-deep);
+    border-radius: 20px;
+    padding: 0.35rem 0.85rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background .2s, color .2s, transform .15s;
+}
+.btn-save-voucher:hover { background: var(--gold); color: var(--navy); transform: translateY(-1px); }
+.btn-save-voucher:disabled, .btn-save-voucher.saved {
+    background: #e8f5e9; color: #2e7d32; border-color: #a5d6a7; cursor: default; transform: none;
+}
+</style>
+<script>
+function copyVoucher(btn) {
+    const code = btn.getAttribute('data-code');
+    navigator.clipboard.writeText(code).then(() => {
+        const original = btn.innerHTML;
+        btn.classList.add('copied');
+        btn.innerHTML = '<i class="bi bi-check-lg me-1"></i>Đã sao chép';
+        setTimeout(() => { btn.classList.remove('copied'); btn.innerHTML = original; }, 2000);
+    });
+}
+function saveVoucher(btn) {
+    const id = btn.getAttribute('data-id');
+    const original = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>';
+    fetch('/vouchers/' + id + '/save', { method: 'POST' })
+        .then(r => r.json())
+        .then(data => {
+            if (data.message) {
+                // Ẩn card voucher này khỏi danh sách
+                const card = btn.closest('.col-lg-4');
+                card.style.transition = 'opacity .35s, transform .35s';
+                card.style.opacity = '0';
+                card.style.transform = 'scale(0.9)';
+                setTimeout(() => card.remove(), 380);
+            } else {
+                btn.disabled = false;
+                btn.innerHTML = original;
+                alert(data.error || 'Không thể lưu voucher');
+            }
+        })
+        .catch(() => { btn.disabled = false; btn.innerHTML = original; });
+}
+</script>
+
+<!-- TRAVEL NEWS -->
+<section class="py-5" id="travel-news">
+    <div class="container">
+        <div class="text-center mb-5">
+            <span class="section-tag">Bài viết du lịch</span>
+            <h2>Gợi ý chuyến đi & trải nghiệm</h2>
+            <div class="section-divider"></div>
+        </div>
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6">
+                <div class="room-card h-100">
+                    <div class="room-img-wrap" style="height:220px">
+                        <img src="https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=1200&q=80" alt="travel news">
+                    </div>
+                    <div class="card-body">
+                        <span class="section-tag mb-2" style="margin-bottom:0.8rem">Mẹo du lịch</span>
+                        <h5 class="mb-2">5 trải nghiệm nên thử khi đến TP.HCM</h5>
+                        <p class="text-muted small mb-3">Từ ẩm thực địa phương đến các địa điểm biểu tượng, đây là gợi ý cho một chuyến đi trọn vẹn hơn.</p>
+                        <a href="#" class="btn btn-outline-gold w-100">Đọc thêm</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="room-card h-100">
+                    <div class="room-img-wrap" style="height:220px">
+                        <img src="https://images.unsplash.com/photo-1483683804023-6ccdb62f86ef?w=1200&q=80" alt="travel news">
+                    </div>
+                    <div class="card-body">
+                        <span class="section-tag mb-2" style="margin-bottom:0.8rem">Lịch trình</span>
+                        <h5 class="mb-2">Gợi ý 2 ngày nghỉ dưỡng sang trọng</h5>
+                        <p class="text-muted small mb-3">Một lịch trình thư giãn với spa, ẩm thực fine dining và thời gian nghỉ ngơi hợp lý.</p>
+                        <a href="#" class="btn btn-outline-gold w-100">Đọc thêm</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="room-card h-100">
+                    <div class="room-img-wrap" style="height:220px">
+                        <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1200&q=80" alt="travel news">
+                    </div>
+                    <div class="card-body">
+                        <span class="section-tag mb-2" style="margin-bottom:0.8rem">Kinh nghiệm</span>
+                        <h5 class="mb-2">Cách chọn phòng phù hợp cho kỳ nghỉ</h5>
+                        <p class="text-muted small mb-3">Mẹo chọn phòng theo nhu cầu: view đẹp, diện tích rộng, gần tiện ích hoặc phù hợp gia đình.</p>
+                        <a href="#" class="btn btn-outline-gold w-100">Đọc thêm</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SERVICES -->
+<section class="py-5 section-surface" id="services">
+    <div class="container">
+        <div class="text-center mb-5">
+            <span class="section-tag">Dịch vụ</span>
+            <h2>Tiện ích & Dịch vụ</h2>
+            <div class="section-divider"></div>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="text-center p-4 rounded" style="border:1px solid var(--border)">
+                    <div style="width:64px;height:64px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem">
+                        <i class="bi bi-water text-white fs-4"></i>
+                    </div>
+                    <h5 style="font-family:'Lato',sans-serif;font-weight:600">Hồ bơi & Spa</h5>
+                    <p class="text-muted small mb-0">Hồ bơi vô cực tầng thượng, trung tâm Spa cao cấp với 15 phòng trị liệu, sauna và jacuzzi phục vụ 7:00–22:00.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center p-4 rounded" style="border:1px solid var(--border)">
+                    <div style="width:64px;height:64px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem">
+                        <i class="bi bi-egg-fried fs-4 text-white"></i>
+                    </div>
+                    <h5 style="font-family:'Lato',sans-serif;font-weight:600">Nhà hàng & Bar</h5>
+                    <p class="text-muted small mb-0">Nhà hàng phục vụ ẩm thực Á–Âu, Sky Bar tầng 25 với view toàn thành phố, phục vụ 6:00–23:00.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center p-4 rounded" style="border:1px solid var(--border)">
+                    <div style="width:64px;height:64px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem">
+                        <i class="bi bi-car-front text-white fs-4"></i>
+                    </div>
+                    <h5 style="font-family:'Lato',sans-serif;font-weight:600">Đưa đón Sân bay</h5>
+                    <p class="text-muted small mb-0">Dịch vụ limousine cao cấp đưa đón sân bay Tân Sơn Nhất, đặt trước ít nhất 4 giờ, phục vụ 24/7.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center p-4 rounded" style="border:1px solid var(--border)">
+                    <div style="width:64px;height:64px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem">
+                        <i class="bi bi-wifi fs-4 text-white"></i>
+                    </div>
+                    <h5 style="font-family:'Lato',sans-serif;font-weight:600">Wi-Fi Tốc độ cao</h5>
+                    <p class="text-muted small mb-0">Wi-Fi cáp quang 1 Gbps miễn phí phủ sóng toàn bộ khu vực khách sạn, kể cả hồ bơi và vườn.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center p-4 rounded" style="border:1px solid var(--border)">
+                    <div style="width:64px;height:64px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem">
+                        <i class="bi bi-person-badge text-white fs-4"></i>
+                    </div>
+                    <h5 style="font-family:'Lato',sans-serif;font-weight:600">Butler liên tục</h5>
+                    <p class="text-muted small mb-0">Dịch vụ hỗ trợ riêng cho phòng Suite và Deluxe cao cấp, phục vụ mọi nhu cầu trong suốt thời gian lưu trú.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center p-4 rounded" style="border:1px solid var(--border)">
+                    <div style="width:64px;height:64px;border-radius:50%;background:var(--navy);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem">
+                        <i class="bi bi-bicycle fs-4 text-white"></i>
+                    </div>
+                    <h5 style="font-family:'Lato',sans-serif;font-weight:600">Phòng Gym & Tennis</h5>
+                    <p class="text-muted small mb-0">Gym trang bị máy hiện đại, sân tennis trong nhà, lớp yoga buổi sáng miễn phí cho khách lưu trú.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

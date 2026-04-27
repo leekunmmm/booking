@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Đặt phòng')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<div class="page-header" style="padding:3.5rem 0 3rem;">
+    <div class="container text-center">
+        <span class="breadcrumb-text">Đặt phòng</span>
+        <h1 style="font-size:2.5rem;">Xác nhận đặt phòng</h1>
+    </div>
+</div>
+
+<div class="container py-5">
+    <div class="row g-5">
+        <!-- Room summary -->
+        <div class="col-lg-5">
+            <span class="section-tag">Phòng đã chọn</span>
+            <div class="room-card mt-2">
+                <div class="room-img-wrap">
+                    <img th:src="${room.firstImage}" alt="room" style="height:260px;">
+                    <span class="room-badge"
+                          th:classappend="|badge-${#strings.toLowerCase(room.type.name())}|"
+                          th:text="${room.type.displayName}"></span>
+                    <div class="price-tag">
+                        <span class="accent"
+                              th:text="${#numbers.formatInteger(room.pricePerNight, 0, 'POINT')}"></span>
+                        <small> VND/đêm</small>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="stars">★★★★★</div>
+                    <h5>Phòng <span th:text="${room.roomNumber}"></span></h5>
+                    <p class="amenities">
+                        <i class="bi bi-people"></i>
+                        <span th:text="${room.capacity}"></span> khách
+                        <span class="sep">·</span>
+                        <span th:each="a,stat : ${room.amenities}" th:if="${stat.index < 3}">
+                            <i th:class="${'bi ' + a.icon}"></i>
+                            <span th:text="${a.displayName}"></span>
+                            <span class="sep" th:if="${!stat.last and stat.index < 2}">·</span>
+                        </span>
+                    </p>
+                    <p class="text-muted small" th:text="${#strings.abbreviate(room.description, 100)}"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Booking form -->
+        <div class="col-lg-7">
+            <span class="section-tag">Thông tin đặt phòng</span>
+            <div class="auth-card mt-2">
+                <div class="card-body p-4">
+                    <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+
+                    <div class="d-flex align-items-center justify-content-between mb-4 small">
+                        <span id="stepLabel1" class="fw-bold" style="color:var(--gold-deep)">Bước 1: Đặt phòng</span>
+                        <span id="stepLabel2" class="text-muted">Bước 2: Thông tin khách hàng</span>
+                        <span id="stepLabel3" class="text-muted">Bước 3: Thanh toán</span>
+                    </div>
+
+                    <form th:action="@{/bookings}" method="post" th:object="${bookingForm}" id="bookingForm">
+                        <input type="hidden" th:field="*{roomId}">
+
+                        <div id="step1Fields">
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label fw-600">
+                                    <i class="bi bi-calendar-event me-1" style="color:var(--gold)"></i>
+                                    Ngày nhận phòng
+                                </label>
+                                <input type="date" th:field="*{checkIn}" class="form-control"
+                                       id="checkIn" required>
+                                <small class="text-muted">Giờ nhận phòng tiêu chuẩn: 14:00</small>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <label class="form-label fw-600">
+                                    <i class="bi bi-calendar-check me-1" style="color:var(--gold)"></i>
+                                    Ngày trả phòng
+                                </label>
+                                <input type="date" th:field="*{checkOut}" class="form-control"
+                                       id="checkOut" required>
+                                <small class="text-muted">Giờ trả phòng tiêu chuẩn: 12:00</small>
+                            </div>
+                        </div>
+
+                        <!-- Price preview -->
+                        <div id="pricePreview" class="alert alert-info mb-4" style="display:none">
+                            <i class="bi bi-calculator me-2"></i>
+                            <span id="nightsText"></span> đêm ×
+                            <strong th:text="${#numbers.formatInteger(room.pricePerNight, 0, 'POINT')}"></strong> VND
+                            = <strong id="totalText" style="color:var(--gold-deep)"></strong> VND
+                        </div>
+
+                        <!-- Voucher -->
+                        <div class="mb-4">
+                            <label class="form-label fw-600">
+                                <i class="bi bi-ticket-perforated me-1" style="color:var(--gold)"></i>
+                                Mã voucher <small class="text-muted fw-normal">(tuỳ chọn)</small>
+                            </label>
+                            <div class="input-group">
+                                <input type="text" th:field="*{voucherCode}" id="voucherCodeInput"
+                                       class="form-control text-uppercase"
+                                       placeholder="Nhập hoặc chọn từ kho voucher"
+                                       style="letter-spacing:1px">
+                                <button type="button" class="btn btn-outline-secondary"
+                                        data-bs-toggle="modal" data-bs-target="#voucherPickerModal"
+                                        th:if="${savedVouchers != null and not #lists.isEmpty(savedVouchers)}"
+                                        style="font-size:0.82rem;white-space:nowrap">
+                                    <i class="bi bi-wallet2 me-1" style="color:var(--gold)"></i>
+                                    Kho của tôi
+                                    <span class="badge rounded-pill ms-1"
+                                          style="background:var(--navy);font-size:0.7rem"
+                                          th:text="${#lists.size(savedVouchers)}"></span>
+                                </button>
+                            </div>
+                            <small class="text-muted"
+                                   th:if="${savedVouchers == null or #lists.isEmpty(savedVouchers)}">
+                                Bạn chưa có voucher nào trong kho.
+                                <a href="/#vouchers" target="_blank">Lưu voucher ngay</a>
+                            </small>
+                            <small class="text-muted"
+                                   th:if="${savedVouchers != null and not #lists.isEmpty(savedVouchers)}">
+                                Bạn có <strong th:text="${#lists.size(savedVouchers)}"></strong> voucher đang chờ dùng.
+                            </small>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-600">
+                                <i class="bi bi-wallet2 me-1" style="color:var(--gold)"></i>
+                                Phương thức thanh toán
+                            </label>
+                            <select class="form-select" th:field="*{paymentMethod}" required>
+                                <option value="">-- Chọn phương thức thanh toán --</option>
+                                <option th:each="m : ${paymentMethods}"
+                                        th:value="${m.name()}"
+                                        th:text="${m.displayName}"></option>
+                            </select>
+                            <small class="text-muted">Hiện hỗ trợ: Ví MoMo hoặc chuyển khoản qua STK ngân hàng.</small>
+                        </div>
+                        </div>
+
+                        <div id="step2Fields" style="display:none">
+                            <div class="mb-3">
+                                <label class="form-label fw-600">Họ và tên khách hàng</label>
+                                <input type="text" th:field="*{customerFullName}" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-600">Số điện thoại</label>
+                                <input type="text" th:field="*{customerPhone}" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-600">Email</label>
+                                <input type="email" th:field="*{customerEmail}" class="form-control" required>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label fw-600">Ghi chú (tuỳ chọn)</label>
+                                <textarea th:field="*{customerNote}" class="form-control" rows="3"
+                                          placeholder="Yêu cầu thêm: giường đôi, tầng cao, giờ nhận phòng..."></textarea>
+                            </div>
+                        </div>
+
+                        <ul class="list-unstyled mb-4 small text-muted">
+                            <li class="mb-1"><i class="bi bi-check-circle text-success me-2"></i>Bước 1: Chọn ngày + phương thức thanh toán</li>
+                            <li class="mb-1"><i class="bi bi-check-circle text-success me-2"></i>Bước 2: Nhập thông tin khách hàng</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Bước 3: Quét mã và chờ admin xác nhận</li>
+                        </ul>
+
+                        <div class="d-flex gap-3">
+                            <a th:href="@{/rooms/{id}(id=${room.id})}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-1"></i>Quay lại
+                            </a>
+                            <button type="button" id="btnPrev" class="btn btn-outline-secondary" style="display:none">Quay lại bước 1</button>
+                            <button type="button" id="btnNext" class="btn btn-gold flex-grow-1">
+                                Tiếp tục bước 2
+                            </button>
+                            <button type="submit" id="btnSubmit" class="btn btn-gold flex-grow-1" style="display:none">
+                                <i class="bi bi-check-circle me-2"></i>Tiếp tục bước 3 thanh toán
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Voucher Picker Modal -->
+<div class="modal fade" id="voucherPickerModal" tabindex="-1" aria-labelledby="voucherPickerLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" style="max-width:480px">
+        <div class="modal-content" style="border-radius:16px;border:none;overflow:hidden">
+            <div class="modal-header" style="background:var(--navy);color:#fff;border:none;padding:1.1rem 1.4rem">
+                <h6 class="modal-title mb-0" id="voucherPickerLabel">
+                    <i class="bi bi-wallet2 me-2" style="color:var(--gold)"></i>
+                    Kho voucher của tôi
+                </h6>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-3" style="background:#faf8f4">
+                <p class="text-muted mb-3" style="font-size:0.8rem">
+                    Chọn voucher để tự động điền mã. Voucher sẽ biến mất khỏi kho sau khi đặt phòng thành công.
+                </p>
+                <div th:each="v : ${savedVouchers}" class="vpc-card mb-2"
+                     th:data-code="${v.code}" onclick="applyVoucher(this)">
+                    <div class="vpc-left">
+                        <div class="vpc-pct" th:text="${v.discountPercent} + '%'">10%</div>
+                        <div class="vpc-off">GIẢM</div>
+                    </div>
+                    <div class="vpc-notch"></div>
+                    <div class="vpc-body">
+                        <div class="vpc-code" th:text="${v.code}">CODE</div>
+                        <div class="vpc-meta">
+                            <span th:if="${v.validUntil != null}"
+                                  th:text="'HSD: ' + ${#temporals.format(v.validUntil, 'dd/MM/yyyy')}"></span>
+                            <span th:if="${v.validUntil == null}">Không giới hạn ngày</span>
+                            <span th:if="${v.targetTier != null}"
+                                  class="ms-2" th:text="'· Hạng ' + ${v.targetTier}"></span>
+                        </div>
+                    </div>
+                    <div class="vpc-arrow"><i class="bi bi-check-circle-fill"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.vpc-card {
+    display: flex; align-items: center;
+    background: #fff; border-radius: 10px;
+    border: 1.5px solid var(--border);
+    overflow: hidden; cursor: pointer;
+    transition: border-color .2s, box-shadow .2s, transform .15s;
+}
+.vpc-card:hover {
+    border-color: var(--gold);
+    box-shadow: 0 4px 16px rgba(201,169,110,0.18);
+    transform: translateY(-1px);
+}
+.vpc-left {
+    background: var(--navy); color: #fff;
+    min-width: 64px; padding: 0.9rem 0.6rem;
+    text-align: center; flex-shrink: 0;
+}
+.vpc-pct { font-size: 1.25rem; font-weight: 700; line-height: 1; color: var(--gold); }
+.vpc-off { font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; margin-top: 2px; opacity: .8; }
+.vpc-notch {
+    width: 0; height: 0; flex-shrink: 0;
+    border-top: 18px solid transparent;
+    border-bottom: 18px solid transparent;
+    border-left: 10px solid var(--navy);
+}
+.vpc-body { flex: 1; padding: 0.7rem 0.8rem; min-width: 0; }
+.vpc-code { font-weight: 700; font-size: 0.92rem; letter-spacing: 1.5px; color: var(--navy); font-family: 'Lato', monospace; }
+.vpc-meta { font-size: 0.74rem; color: var(--text-muted); margin-top: 2px; }
+.vpc-arrow { padding: 0.7rem 1rem; color: var(--border); font-size: 1.2rem; transition: color .2s; }
+.vpc-card:hover .vpc-arrow { color: var(--gold); }
+</style>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+<script th:inline="javascript">
+    const pricePerNight = /*[[${room.pricePerNight}]]*/ 0;
+    const checkInEl = document.getElementById('checkIn');
+    const checkOutEl = document.getElementById('checkOut');
+    const preview = document.getElementById('pricePreview');
+    const nightsText = document.getElementById('nightsText');
+    const totalText = document.getElementById('totalText');
+    const step1 = document.getElementById('step1Fields');
+    const step2 = document.getElementById('step2Fields');
+    const btnNext = document.getElementById('btnNext');
+    const btnPrev = document.getElementById('btnPrev');
+    const btnSubmit = document.getElementById('btnSubmit');
+    const label1 = document.getElementById('stepLabel1');
+    const label2 = document.getElementById('stepLabel2');
+    const label3 = document.getElementById('stepLabel3');
+
+    function updatePreview() {
+        const ci = checkInEl.value, co = checkOutEl.value;
+        if (!ci || !co) { preview.style.display = 'none'; return; }
+        const diff = (new Date(co) - new Date(ci)) / 86400000;
+        if (diff <= 0) { preview.style.display = 'none'; return; }
+        nightsText.textContent = diff;
+        totalText.textContent = (diff * pricePerNight).toLocaleString('vi-VN');
+        preview.style.display = 'block';
+    }
+
+    checkInEl.addEventListener('change', updatePreview);
+    checkOutEl.addEventListener('change', updatePreview);
+
+    function markStep(step) {
+        label1.className = step === 1 ? 'fw-bold' : 'text-muted';
+        label2.className = step === 2 ? 'fw-bold' : 'text-muted';
+        label3.className = 'text-muted';
+        label1.style.color = step === 1 ? 'var(--gold-deep)' : '';
+        label2.style.color = step === 2 ? 'var(--gold-deep)' : '';
+    }
+
+    function goToStep2() {
+        if (!checkInEl.value || !checkOutEl.value) {
+            alert('Vui lòng chọn ngày nhận/trả phòng');
+            return;
+        }
+        if (!document.querySelector('[name="paymentMethod"]').value) {
+            alert('Vui lòng chọn phương thức thanh toán');
+            return;
+        }
+        step1.style.display = 'none';
+        step2.style.display = '';
+        btnNext.style.display = 'none';
+        btnSubmit.style.display = '';
+        btnPrev.style.display = '';
+        markStep(2);
+    }
+
+    function backToStep1() {
+        step1.style.display = '';
+        step2.style.display = 'none';
+        btnNext.style.display = '';
+        btnSubmit.style.display = 'none';
+        btnPrev.style.display = 'none';
+        markStep(1);
+    }
+
+    btnNext.addEventListener('click', goToStep2);
+    btnPrev.addEventListener('click', backToStep1);
+    markStep(1);
+
+    function applyVoucher(card) {
+        document.getElementById('voucherCodeInput').value = card.dataset.code;
+        bootstrap.Modal.getInstance(document.getElementById('voucherPickerModal')).hide();
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Tài khoản của tôi')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<style>
+  .profile-hero {
+    background: linear-gradient(rgba(10,25,41,0.82), rgba(10,25,41,0.92)),
+                url('https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1920&q=80') center/cover;
+    padding: 4rem 0 7rem;
+    color: #fff; text-align: center;
+  }
+  .avatar-circle {
+    width: 96px; height: 96px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold), var(--gold-deep));
+    color: var(--navy); font-weight: 700; font-size: 2.2rem;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1rem;
+    box-shadow: 0 0 0 4px rgba(201,169,110,0.3);
+    overflow: hidden;
+  }
+  .avatar-circle img { width: 100%; height: 100%; object-fit: cover; }
+
+  .member-card {
+    background: #fff; border-radius: 6px;
+    box-shadow: 0 20px 60px rgba(10,25,41,0.15);
+    margin-top: -4rem; position: relative; z-index: 5;
+    overflow: hidden;
+  }
+  .tier-bar {
+    height: 5px;
+  }
+  .tier-BRONZE  { background: linear-gradient(90deg, #cd7f32, #a0522d); }
+  .tier-SILVER  { background: linear-gradient(90deg, #aaa, #888); }
+  .tier-GOLD    { background: linear-gradient(90deg, var(--gold), var(--gold-deep)); }
+  .tier-DIAMOND { background: linear-gradient(90deg, #7ec8e3, #2980b9); }
+  .tier-VIP     { background: linear-gradient(90deg, #9b59b6, #6c3483); }
+
+  .tier-badge {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    padding: 0.3rem 1rem; border-radius: 20px;
+    font-family: 'Lato', sans-serif;
+    font-size: 0.72rem; font-weight: 600; letter-spacing: 1.6px;
+    text-transform: uppercase;
+  }
+  .badge-BRONZE  { background: #fdf0e0; color: #a0522d; }
+  .badge-SILVER  { background: #f0f0f0; color: #666; }
+  .badge-GOLD    { background: #faf3e7; color: var(--gold-deep); }
+  .badge-DIAMOND { background: #e8f4fd; color: #2980b9; }
+  .badge-VIP     { background: #f5eefa; color: #6c3483; }
+
+  .stat-box {
+    text-align: center; padding: 1.5rem 1rem;
+    border-right: 1px solid var(--border);
+  }
+  .stat-box:last-child { border-right: none; }
+  .stat-box .val {
+    font-family: 'Lato', system-ui, sans-serif;
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--navy);
+    line-height: 1;
+    letter-spacing: 0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat-box .lbl {
+    font-family: 'Lato', sans-serif;
+    font-size: 0.72rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 1.2px;
+    color: var(--text-muted); margin-top: 0.4rem;
+  }
+
+  .section-card {
+    background: #fff; border-radius: 6px;
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+  }
+  .section-card-header {
+    background: var(--navy); color: var(--gold);
+    padding: 1rem 1.5rem;
+    font-family: 'Lato', sans-serif;
+    font-size: 0.72rem; font-weight: 600;
+    letter-spacing: 1.6px; text-transform: uppercase;
+  }
+  .section-card-body { padding: 1.75rem 1.5rem; }
+
+  .lux-field { margin-bottom: 1.5rem; }
+  .lux-field label {
+    display: block;
+    font-family: 'Lato', sans-serif;
+    font-size: 0.68rem; font-weight: 600;
+    letter-spacing: 1.4px; text-transform: uppercase;
+    color: var(--text-muted); margin-bottom: 0.45rem;
+  }
+  .lux-field input {
+    width: 100%;
+    border: none; border-bottom: 1.5px solid var(--border);
+    background: transparent; border-radius: 0;
+    padding: 0.6rem 0;
+    font-family: 'Lato', sans-serif; font-size: 0.97rem;
+    color: var(--navy); outline: none; transition: border-color .2s;
+  }
+  .lux-field input:focus { border-bottom-color: var(--gold); }
+
+  .tier-progress-wrap { margin-top: 1rem; }
+  .tier-progress-bar {
+    height: 6px; background: var(--border); border-radius: 3px; overflow: hidden;
+    margin: 0.5rem 0;
+  }
+  .tier-progress-fill { height: 100%; border-radius: 3px; transition: width .5s; }
+  .tier-info { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); }
+  .profile-shell { display: grid; grid-template-columns: 280px 1fr; gap: 1.5rem; align-items: start; }
+  .profile-sidebar { position: sticky; top: 80px; }
+  .profile-card-mini, .profile-panel .section-card { background: #fff; border-radius: 8px; box-shadow: var(--shadow-sm); }
+  .profile-card-mini { padding: 1.25rem; text-align: center; }
+  .avatar-sm { width: 72px; height: 72px; margin: 0 auto 0.75rem; }
+  .member-benefit-card {
+    background: linear-gradient(135deg, #fff, #fbf7ef);
+    border: 1px solid rgba(201,169,110,0.16);
+    border-radius: 10px;
+    box-shadow: var(--shadow-sm);
+  }
+  .member-benefit-head {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid rgba(201,169,110,0.12);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .member-benefit-body { padding: 1rem 1.25rem; }
+  .member-rows { display: grid; gap: 0.8rem; }
+  .member-row {
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    background: #fff; border: 1px solid var(--border); border-radius: 8px;
+    padding: 0.85rem 1rem;
+  }
+  .member-row.active { border-color: rgba(201,169,110,0.45); background: #faf7f1; }
+  .member-title {
+    margin: 0;
+    font-family: 'Lato', sans-serif;
+    font-size: 0.86rem;
+    line-height: 1.25;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    color: var(--navy);
+  }
+  .member-desc { font-size: 0.8rem; line-height: 1.6; color: var(--text-muted); font-weight: 400; }
+  .member-range { font-size: 0.75rem; color: var(--gold-deep); white-space: nowrap; font-weight: 500; letter-spacing: 0.3px; font-variant-numeric: tabular-nums; }
+  .member-tier-name {
+    font-family: 'Lato', system-ui, sans-serif;
+    font-size: clamp(1.6rem, 2vw, 2rem);
+    line-height: 1.1;
+    font-weight: 800;
+    letter-spacing: 0.01em;
+    margin: 0;
+    color: var(--navy);
+    font-variant-numeric: tabular-nums;
+  }
+  .member-tier-label {
+    margin: 0;
+    font-family: 'Lato', sans-serif;
+    font-size: 0.72rem;
+    line-height: 1.4;
+    font-weight: 600;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .profile-tab-btn {
+    width: 100%; border: 1px solid var(--border); background: #fff; color: var(--navy);
+    padding: 0.95rem 1rem; border-radius: 8px; text-align: left; margin-bottom: 0.75rem;
+    font-weight: 700; transition: all .2s;
+  }
+  .profile-tab-btn.active, .profile-tab-btn:hover { background: var(--navy); color: #fff; border-color: var(--navy); }
+  .profile-panel { display: none; }
+  .profile-panel.active { display: block; }
+  .voucher-card {
+    background: linear-gradient(135deg, #fff, #fbf7ef);
+    border: 1px solid rgba(201,169,110,0.18);
+    border-radius: 8px;
+    padding: 1rem 1.1rem;
+    box-shadow: 0 10px 30px rgba(10,25,41,0.06);
+  }
+  .voucher-code {
+    display: inline-block;
+    background: var(--navy);
+    color: var(--gold);
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    border-radius: 999px;
+    padding: 0.25rem 0.8rem;
+    font-size: 0.72rem;
+  }
+  /* Saved voucher card */
+  .saved-voucher-card {
+    display: flex; align-items: stretch;
+    background: #fff;
+    border: 1px solid rgba(201,169,110,0.22);
+    border-radius: 10px; overflow: hidden;
+    box-shadow: 0 4px 16px rgba(10,25,41,0.07);
+    transition: box-shadow .2s;
+  }
+  .saved-voucher-card:hover { box-shadow: 0 8px 28px rgba(10,25,41,0.12); }
+  .saved-voucher-card.expired { opacity: .55; filter: grayscale(.4); }
+  .sv-left {
+    display: flex; align-items: center; justify-content: center;
+    min-width: 64px;
+    background: linear-gradient(160deg, var(--navy), #102a43);
+    color: var(--gold);
+    font-family: 'Lato', sans-serif;
+    font-weight: 800; font-size: 1.3rem; line-height: 1;
+    flex-shrink: 0; padding: 0.75rem 0.5rem; text-align: center;
+  }
+  .sv-body { flex: 1; padding: 0.75rem 0.9rem; min-width: 0; }
+  .sv-code {
+    font-family: 'Lato', monospace;
+    font-size: 1rem; font-weight: 800;
+    letter-spacing: 1.8px; color: var(--navy);
+    text-transform: uppercase; margin-bottom: 0.25rem;
+  }
+  .sv-info { font-size: 0.74rem; color: var(--text-muted); margin-bottom: 0.2rem; }
+  .sv-tier { font-size: 0.7rem; font-weight: 700; color: var(--gold-deep); margin-bottom: 0.2rem; }
+  .sv-hint { font-size: 0.7rem; color: var(--text-muted); font-style: italic; }
+  .sv-action {
+    display: flex; align-items: center; justify-content: center;
+    padding: 0 0.85rem;
+    border-left: 1px dashed rgba(201,169,110,0.25);
+  }
+  .sv-copy-btn {
+    background: none; border: 1.5px solid var(--gold);
+    color: var(--gold-deep); border-radius: 8px;
+    width: 36px; height: 36px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem; cursor: pointer; transition: background .2s, color .2s;
+  }
+  .sv-copy-btn:hover { background: var(--gold); color: var(--navy); }
+  .sv-copy-btn.copied { background: #e8f5e9; color: #2e7d32; border-color: #a5d6a7; }
+</style>
+
+<!-- HERO -->
+<section class="profile-hero">
+  <div th:if="${profileUser.avatarUrl != null and !#strings.isEmpty(profileUser.avatarUrl)}" class="avatar-circle">
+    <img th:src="${profileUser.avatarUrl}" alt="avatar">
+  </div>
+  <div th:unless="${profileUser.avatarUrl != null and !#strings.isEmpty(profileUser.avatarUrl)}" class="avatar-circle">
+    <span th:text="${#strings.substring(profileUser.fullName, 0, 1)}">A</span>
+  </div>
+  <h2 style="font-size:1.8rem;margin-bottom:0.25rem" th:text="${profileUser.fullName}">Tên</h2>
+  <p style="opacity:0.65;font-size:0.9rem;margin-bottom:1rem" th:text="${'@' + profileUser.username}">@user</p>
+  <span class="tier-badge"
+        th:classappend="${'badge-' + memberTier}"
+        th:text="${memberTierLabel}">
+    Member
+  </span>
+</section>
+
+<div class="container py-5">
+  <div class="alert alert-success mb-4" th:if="${success}" th:text="${success}"></div>
+
+  <div class="profile-shell">
+    <aside class="profile-sidebar">
+      <div class="profile-card-mini mb-3">
+        <div th:if="${profileUser.avatarUrl != null and !#strings.isEmpty(profileUser.avatarUrl)}" class="avatar-circle avatar-sm mb-2">
+          <img th:src="${profileUser.avatarUrl}" alt="avatar">
+        </div>
+        <div th:unless="${profileUser.avatarUrl != null and !#strings.isEmpty(profileUser.avatarUrl)}" class="avatar-circle avatar-sm mb-2">
+          <span th:text="${#strings.substring(profileUser.fullName, 0, 1)}">A</span>
+        </div>
+        <div class="fw-bold" th:text="${profileUser.fullName}">Tên</div>
+        <div class="text-uppercase small text-muted" th:text="${profileUser.role.name()}">CUSTOMER</div>
+      </div>
+
+      <button class="profile-tab-btn active" type="button" data-target="accountPanel">Thông tin tài khoản</button>
+      <button class="profile-tab-btn" type="button" data-target="voucherPanel">Kho voucher</button>
+      <button class="profile-tab-btn" type="button" data-target="bookingPanel">Đặt phòng của tôi</button>
+    </aside>
+
+    <main class="profile-content">
+      <div class="member-card mb-4">
+        <div class="tier-bar" th:classappend="${'tier-' + memberTier}"></div>
+        <div class="row g-0">
+          <div class="col-4 stat-box">
+            <div class="val" th:text="${bookingCount}">0</div>
+            <div class="lbl">Đặt phòng</div>
+          </div>
+          <div class="col-4 stat-box">
+            <div class="val" th:text="${#numbers.formatInteger(totalSpent, 0, 'POINT')}">0</div>
+            <div class="lbl">VND đã chi</div>
+          </div>
+          <div class="col-4 stat-box">
+            <div class="val" th:text="${memberTierLabel}">Bronze</div>
+            <div class="lbl">Member Tier</div>
+          </div>
+        </div>
+      </div>
+
+      <section id="accountPanel" class="profile-panel active">
+        <div class="section-card">
+          <div class="section-card-header">Thông tin tài khoản</div>
+          <div class="section-card-body">
+            <form th:action="@{/profile/update}" method="post">
+              <div class="row g-3">
+                <div class="col-md-6 lux-field">
+                  <label>Họ và tên *</label>
+                  <input type="text" name="fullName" th:value="${profileUser.fullName}" required>
+                </div>
+                <div class="col-md-6 lux-field">
+                  <label>Email *</label>
+                  <input type="email" name="email" th:value="${profileUser.email}" required>
+                </div>
+              </div>
+              <div class="lux-field">
+                <label>Số điện thoại</label>
+                <input type="text" name="phone" th:value="${profileUser.phone}" placeholder="0901 234 567">
+              </div>
+              <input type="hidden" name="avatarUrl" id="avatarUrlInput" th:value="${profileUser.avatarUrl}">
+              <div class="mb-3">
+                <label class="d-block mb-2">Tải ảnh đại diện từ máy</label>
+                <input type="file" id="avatarFile" accept="image/*" class="form-control">
+                <small class="text-muted">Chọn ảnh, hệ thống sẽ tự tải lên và lưu vào hồ sơ.</small>
+              </div>
+              <div class="mb-4" id="avatarPreviewWrap" th:style="${profileUser.avatarUrl != null and !#strings.isEmpty(profileUser.avatarUrl) ? '' : 'display:none'}">
+                <img th:src="${profileUser.avatarUrl}" id="avatarImg" style="width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid var(--gold)">
+              </div>
+              <div class="d-flex gap-2 align-items-center flex-wrap">
+                <button type="submit" class="btn btn-gold"><i class="bi bi-check-circle me-2"></i>Lưu thay đổi</button>
+                <span class="small text-muted">Ảnh sẽ tự tải lên khi bạn chọn file.</span>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <section id="voucherPanel" class="profile-panel">
+        <div class="member-benefit-card mb-4">
+          <div class="member-benefit-head">
+            <div>
+              <div class="section-tag mb-1" style="margin-bottom:0">Quyền lợi thành viên</div>
+              <h5 class="mb-0" style="color:var(--navy)">Ưu đãi hiện tại</h5>
+            </div>
+            <span class="tier-badge" th:classappend="${'badge-' + memberTier}" th:text="${memberDiscountPercent + '%'}">0%</span>
+          </div>
+          <div class="member-benefit-body">
+            <div class="member-tier-name mb-2" th:text="${memberTierLabel}">Silver</div>
+            <div class="member-tier-label mb-3">Member Tier</div>
+            <div style="font-weight:700;color:var(--navy)" class="mb-3" th:text="${memberBenefit}">Ưu đãi member</div>
+            <div class="member-rows">
+              <div class="member-row" th:each="tier, stat : ${ {'BRONZE','SILVER','GOLD','DIAMOND','VIP'} }" th:classappend="${tier == memberTier ? 'active' : ''}">
+                <div>
+                  <div class="member-title"
+                       th:text="${tier == 'BRONZE' ? 'Bronze' : (tier == 'SILVER' ? 'Silver' : (tier == 'GOLD' ? 'Gold' : (tier == 'DIAMOND' ? 'Diamond' : 'VIP')))}">
+                  </div>
+                  <div class="member-desc"
+                       th:text="${tier == 'BRONZE'  ? 'Basic points, start your membership journey.' :
+                                  (tier == 'SILVER'  ? '5% discount on services, priority support.' :
+                                  (tier == 'GOLD'    ? '10% discount, priority early check-in.' :
+                                  (tier == 'DIAMOND' ? '15% discount, room upgrade when available.' :
+                                                       '20% discount, dedicated concierge & exclusive perks.')))}">
+                  </div>
+                </div>
+                <div class="member-range"
+                     th:text="${tier == 'BRONZE'  ? '0 – 5M VND' :
+                                (tier == 'SILVER'  ? '5 – 20M VND' :
+                                (tier == 'GOLD'    ? '20 – 50M VND' :
+                                (tier == 'DIAMOND' ? '50 – 100M VND' : '> 100M VND')))}">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <div class="section-card-header">Kho voucher của bạn</div>
+          <div class="section-card-body">
+            <div class="row g-3" th:if="${myVouchers != null and !#lists.isEmpty(myVouchers)}">
+              <div class="col-md-6" th:each="v : ${myVouchers}">
+                <div class="saved-voucher-card" th:classappend="${!v.usable ? 'expired' : ''}">
+                  <div class="sv-left">
+                    <div class="sv-percent">
+                      <span th:text="${v.discountPercent}">10</span>%
+                    </div>
+                  </div>
+                  <div class="sv-body">
+                    <div class="sv-code" th:text="${v.code}">CODE</div>
+                    <div class="sv-info">
+                      <span th:if="${v.validUntil != null}">
+                        <i class="bi bi-clock me-1"></i>HSD: <span th:text="${#temporals.format(v.validUntil, 'dd/MM/yyyy')}"></span>
+                      </span>
+                      <span th:if="${v.validUntil == null}"><i class="bi bi-infinity me-1"></i>Không giới hạn thời gian</span>
+                    </div>
+                    <div class="sv-tier" th:if="${v.targetTier != null}">
+                      <i class="bi bi-star-fill me-1"></i>
+                      <span th:text="${v.targetTier == 'BRONZE' ? 'Hạng Bronze' :
+                                      (v.targetTier == 'SILVER' ? 'Hạng Silver' :
+                                      (v.targetTier == 'GOLD'   ? 'Hạng Gold'   :
+                                      (v.targetTier == 'DIAMOND'? 'Hạng Diamond': 'Hạng VIP')))}"></span>
+                    </div>
+                    <div class="sv-hint" th:if="${v.usable}">
+                      <i class="bi bi-tag me-1"></i>Nhập mã khi đặt phòng để sử dụng
+                    </div>
+                    <div class="sv-hint text-danger" th:if="${!v.usable}">
+                      <i class="bi bi-x-circle me-1"></i>Voucher đã hết hiệu lực
+                    </div>
+                  </div>
+                  <div class="sv-action" th:if="${v.usable}">
+                    <button class="sv-copy-btn"
+                            th:data-code="${v.code}"
+                            onclick="svCopy(this)">
+                      <i class="bi bi-clipboard"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="text-center py-4" th:if="${myVouchers == null or #lists.isEmpty(myVouchers)}">
+              <i class="bi bi-ticket-perforated fs-1 mb-3 d-block" style="color:var(--gold-deep);opacity:.4"></i>
+              <div class="text-muted mb-2">Kho voucher của bạn đang trống.</div>
+              <a th:href="@{/#vouchers}" class="btn btn-outline-gold btn-sm">
+                <i class="bi bi-search me-1"></i>Xem voucher đang có
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="bookingPanel" class="profile-panel">
+        <div class="section-card">
+          <div class="section-card-header">Đặt phòng của tôi</div>
+          <div class="section-card-body">
+            <div th:if="${myBookings != null and !#lists.isEmpty(myBookings)}" class="table-luxury table-responsive">
+              <table class="table mb-0 align-middle">
+                <thead>
+                <tr>
+                  <th>Mã</th>
+                  <th>Phòng</th>
+                  <th>Nhận phòng</th>
+                  <th>Trả phòng</th>
+                  <th class="text-center">Trạng thái</th>
+                  <th class="text-end">Tổng tiền</th>
+                  <th class="text-end">Thao tác</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="b : ${myBookings}">
+                  <td><strong style="color:var(--gold-deep)">#<span th:text="${b.id}"></span></strong></td>
+                  <td>
+                    <strong th:text="${b.room != null ? 'Phòng ' + b.room.roomNumber : '—'}"></strong><br>
+                    <small class="text-muted" th:text="${b.room != null ? b.room.type.displayName : ''}"></small>
+                  </td>
+                  <td th:text="${#temporals.format(b.checkIn, 'dd/MM/yyyy')}"></td>
+                  <td th:text="${#temporals.format(b.checkOut, 'dd/MM/yyyy')}"></td>
+                  <td class="text-center">
+                    <span class="status-badge"
+                          th:classappend="${b.status.name() == 'PENDING'} ? 'status-pending' :
+                                          (${b.status.name() == 'CONFIRMED'} ? 'status-confirmed' :
+                                          (${b.status.name() == 'COMPLETED'} ? 'status-completed' : 'status-cancelled'))"
+                          th:text="${b.status.displayName}"></span>
+                  </td>
+                  <td class="text-end">
+                    <strong th:text="${#numbers.formatInteger(b.totalPrice, 0, 'POINT')} + ' VND'"></strong>
+                  </td>
+                  <td class="text-end">
+                    <a th:href="@{/my-bookings}" class="btn btn-sm btn-outline-gold">Xem chi tiết</a>
+                  </td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="text-center py-4" th:if="${myBookings == null or #lists.isEmpty(myBookings)}">
+              <i class="bi bi-journal-bookmark fs-1 mb-3 text-muted"></i>
+              <div class="text-muted mb-3">Bạn chưa có đặt phòng nào.</div>
+              <a th:href="@{/rooms}" class="btn btn-gold">Tìm phòng ngay</a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<script>
+function svCopy(btn) {
+    const code = btn.getAttribute('data-code');
+    navigator.clipboard.writeText(code).then(() => {
+        const orig = btn.innerHTML;
+        btn.classList.add('copied');
+        btn.innerHTML = '<i class="bi bi-check-lg"></i>';
+        setTimeout(() => { btn.classList.remove('copied'); btn.innerHTML = orig; }, 2000);
+    });
+}
+</script>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+<script th:inline="javascript">
+document.querySelectorAll('.profile-tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.profile-tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.profile-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    const panel = document.getElementById(btn.dataset.target);
+    if (panel) panel.classList.add('active');
+  });
+});
+
+function isAvatarUrlSupported(url) {
+  const v = (url || '').trim().toLowerCase();
+  return v.startsWith('http://') || v.startsWith('https://') || v.startsWith('/uploads/');
+}
+
+function previewAvatar(url) {
+  const img = document.getElementById('avatarImg');
+  const wrap = document.getElementById('avatarPreviewWrap');
+  if (isAvatarUrlSupported(url)) {
+    img.src = url;
+    wrap.style.display = 'block';
+  } else {
+    wrap.style.display = 'none';
+  }
+}
+
+async function uploadAvatarFile(file) {
+  const fd = new FormData();
+  fd.append('file', file);
+  const uploadUrl = /*[[@{/profile/upload-avatar}]]*/ '/profile/upload-avatar';
+  const res = await fetch(uploadUrl, { method: 'POST', body: fd });
+  const text = await res.text();
+  let data = {};
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch (e) {
+    data = { error: text };
+  }
+  if (!res.ok || !data.url) throw new Error(data.error || 'Upload thất bại');
+  document.getElementById('avatarUrlInput').value = data.url;
+  previewAvatar(data.url);
+}
+
+const avatarFile = document.getElementById('avatarFile');
+if (avatarFile) {
+  avatarFile.addEventListener('change', async (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    try {
+      await uploadAvatarFile(file);
+    } catch (err) {
+      alert(err.message || 'Không thể tải ảnh đại diện');
+    }
+  });
+}
+</script>
+</body>
+</html>

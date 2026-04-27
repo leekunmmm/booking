@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Voucher')}"></head>
+<body>
+<div th:replace="~{fragments/layout :: admin-navbar}"></div>
+
+<div class="admin-layout">
+    <div th:replace="~{fragments/layout :: admin-sidebar}"></div>
+
+    <div class="admin-content">
+        <div class="mb-4">
+            <span class="section-tag">Admin / Voucher</span>
+            <h2 class="mb-0" th:text="${editing} ? 'Chỉnh sửa voucher' : 'Tạo voucher mới'"></h2>
+        </div>
+
+        <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+
+        <div class="row justify-content-start">
+            <div class="col-lg-6">
+                <div class="bg-white rounded p-4" style="box-shadow:var(--shadow-sm)">
+                    <form th:action="${editing} ? @{/admin/vouchers/{id}/edit(id=${voucherForm.id})} : @{/admin/vouchers}"
+                          method="post" th:object="${voucherForm}">
+
+                        <div class="mb-3">
+                            <label class="form-label fw-600">Mã voucher <span class="text-danger">*</span></label>
+                            <input type="text" th:field="*{code}" class="form-control text-uppercase"
+                                   placeholder="VD: SUMMER20" required
+                                   style="font-weight:700;letter-spacing:2px">
+                            <small class="text-muted">Mã sẽ tự động chuyển thành chữ hoa</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-600">Giảm giá (%) <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <input type="number" min="1" max="100" th:field="*{discountPercent}"
+                                       class="form-control" placeholder="VD: 20" required>
+                                <span class="input-group-text fw-bold" style="background:var(--gold);color:var(--navy)">%</span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-600">Ngày hết hạn</label>
+                            <input type="date" th:field="*{validUntil}" class="form-control">
+                            <small class="text-muted">Để trống = không giới hạn</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-600">Số lượng phát hành</label>
+                            <input type="number" min="1" th:field="*{maxUses}" class="form-control" placeholder="100">
+                            <small class="text-muted">Tổng số lần voucher có thể được dùng trên toàn hệ thống</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-600">Áp dụng cho hạng</label>
+                            <select th:field="*{targetTier}" class="form-select">
+                                <option value="">Tất cả thành viên</option>
+                                <option th:each="t : ${memberTiers}"
+                                        th:value="${t.name()}"
+                                        th:text="${t.displayName}"></option>
+                            </select>
+                            <small class="text-muted">Chọn hạng thành viên được dùng voucher, hoặc để trống cho tất cả</small>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" th:field="*{active}" id="activeToggle">
+                                <label class="form-check-label fw-600" for="activeToggle">
+                                    Kích hoạt voucher
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-3">
+                            <a th:href="@{/admin/vouchers}" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle me-1"></i>Huỷ
+                            </a>
+                            <button type="submit" class="btn btn-gold flex-grow-1">
+                                <i class="bi bi-check-circle me-2"></i>
+                                <span th:text="${editing} ? 'Lưu thay đổi' : 'Tạo voucher'"></span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="bg-white rounded p-4 ms-lg-2" style="box-shadow:var(--shadow-sm)">
+                    <h6 class="fw-bold mb-3" style="color:var(--navy)">Hướng dẫn</h6>
+                    <ul class="list-unstyled small text-muted">
+                        <li class="mb-2"><i class="bi bi-info-circle me-2" style="color:var(--gold)"></i>Mã voucher là duy nhất, tự động chuyển chữ hoa.</li>
+                        <li class="mb-2"><i class="bi bi-info-circle me-2" style="color:var(--gold)"></i>Giảm giá áp dụng lên tổng tiền booking.</li>
+                        <li class="mb-2"><i class="bi bi-info-circle me-2" style="color:var(--gold)"></i>Mỗi tài khoản chỉ dùng được voucher <strong>1 lần</strong>.</li>
+                        <li class="mb-2"><i class="bi bi-info-circle me-2" style="color:var(--gold)"></i>"Số lượng phát hành" là tổng lượt dùng toàn hệ thống.</li>
+                        <li><i class="bi bi-info-circle me-2" style="color:var(--gold)"></i>Voucher hết hạn hoặc hết lượt sẽ tự động vô hiệu.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

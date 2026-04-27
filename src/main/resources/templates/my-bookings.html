@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Đặt phòng của tôi')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<div class="page-header" style="padding: 3.5rem 0 3rem;">
+    <div class="container text-center">
+        <span class="breadcrumb-text">Tài khoản</span>
+        <h1 style="font-size:2.5rem;">Đặt phòng của tôi</h1>
+    </div>
+</div>
+
+<div class="container py-5">
+    <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
+    <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+
+    <div th:if="${not #lists.isEmpty(bookings)}">
+        <div class="table-luxury table-responsive">
+            <table class="table mb-0 align-middle">
+                <thead>
+                <tr>
+                    <th>Mã</th>
+                    <th>Phòng</th>
+                    <th>Nhận phòng</th>
+                    <th>Trả phòng</th>
+                    <th class="text-center">Số đêm</th>
+                    <th class="text-end">Tổng tiền</th>
+                    <th class="text-center">Trạng thái</th>
+                    <th class="text-center">Thanh toán</th>
+                    <th class="text-center">PT thanh toán</th>
+                    <th class="text-end">Thao tác</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="b : ${bookings}">
+                    <td>
+                        <strong style="color:var(--gold-deep)">#<span th:text="${b.id}"></span></strong>
+                    </td>
+                    <td>
+                        <span th:if="${b.room != null}">
+                            <strong>Phòng <span th:text="${b.room.roomNumber}"></span></strong><br>
+                            <small class="text-muted" th:text="${b.room.type.displayName}"></small>
+                        </span>
+                    </td>
+                    <td th:text="${#temporals.format(b.checkIn, 'dd/MM/yyyy')}"></td>
+                    <td th:text="${#temporals.format(b.checkOut, 'dd/MM/yyyy')}"></td>
+                    <td class="text-center">
+                        <strong th:text="${b.numberOfNights}"></strong>
+                    </td>
+                    <td class="text-end">
+                        <strong th:text="${#numbers.formatInteger(b.totalPrice, 0, 'POINT')} + ' VND'"></strong>
+                    </td>
+                    <td class="text-center">
+                        <span class="status-badge"
+                              th:classappend="${b.status.name() == 'PENDING'} ? 'status-pending' :
+                                              (${b.status.name() == 'CONFIRMED'} ? 'status-confirmed' :
+                                              (${b.status.name() == 'COMPLETED'} ? 'status-completed' : 'status-cancelled'))"
+                              th:text="${b.status.displayName}"></span>
+                    </td>
+                    <td class="text-center">
+                        <span class="status-badge"
+                              th:classappend="${b.paymentStatus.name() == 'PAID'} ? 'status-paid' :
+                                              (${b.paymentStatus.name() == 'PENDING_CONFIRMATION'} ? 'status-pending' : 'status-unpaid')"
+                              th:text="${b.paymentStatus.displayName}"></span>
+                    </td>
+                    <td class="text-center">
+                        <span class="text-muted"
+                              th:text="${b.paymentMethod != null ? b.paymentMethod.displayName : 'Chuyển khoản ngân hàng'}"></span>
+                    </td>
+                    <td class="text-end">
+                        <div class="d-flex gap-1 justify-content-end">
+                            <form th:if="${b.paymentStatus.name() == 'UNPAID' and b.status.name() != 'CANCELLED'}"
+                                  th:action="@{/bookings/{id}/payment(id=${b.id})}" method="get">
+                                <button class="btn btn-sm btn-gold" title="Tiếp tục bước 3 thanh toán">
+                                    <i class="bi bi-qr-code-scan"></i>
+                                </button>
+                            </form>
+                            <form th:if="${b.status.name() != 'CANCELLED' and b.status.name() != 'COMPLETED'}"
+                                  th:action="@{/bookings/{id}/cancel(id=${b.id})}" method="post"
+                                  onsubmit="return confirm('Bạn chắc muốn huỷ booking này?');">
+                                <button class="btn btn-sm btn-outline-danger">
+                                    <i class="bi bi-x-circle"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="row g-3 mt-4">
+            <div class="col-md-3">
+                <div class="p-3 bg-white rounded" style="box-shadow:var(--shadow-sm); border-left: 3px solid var(--gold);">
+                    <div class="small text-muted">Tổng đặt phòng</div>
+                    <div class="fw-bold fs-5" th:text="${#lists.size(bookings)}"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center py-5" th:if="${#lists.isEmpty(bookings)}">
+        <i class="bi bi-journal-bookmark fs-1 mb-3" style="color:var(--text-muted)"></i>
+        <h5>Chưa có đặt phòng nào</h5>
+        <p class="text-muted">Khám phá các phòng nghỉ sang trọng của chúng tôi.</p>
+        <a th:href="@{/rooms}" class="btn btn-gold">
+            <i class="bi bi-search me-2"></i>Tìm phòng ngay
+        </a>
+    </div>
+</div>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

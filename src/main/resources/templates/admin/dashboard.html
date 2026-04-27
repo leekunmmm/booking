@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Dashboard')}"></head>
+<body>
+<div th:replace="~{fragments/layout :: admin-navbar}"></div>
+
+<div class="admin-layout">
+    <div th:replace="~{fragments/layout :: admin-sidebar}"></div>
+
+    <div class="admin-content">
+
+        <!-- Page header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <span class="section-tag">Admin</span>
+                <h2 class="mb-0">Dashboard</h2>
+            </div>
+            <div class="small text-muted">
+                <i class="bi bi-clock me-1"></i>
+                <span id="live-time"></span>
+            </div>
+        </div>
+
+        <!-- Stat cards -->
+        <div class="row g-3 mb-4">
+            <div class="col-sm-6 col-xl">
+                <div class="dash-stat-card">
+                    <div class="dash-stat-icon"><i class="bi bi-door-closed"></i></div>
+                    <div class="dash-stat-body">
+                        <div class="dash-stat-label">Tổng phòng</div>
+                        <div class="dash-stat-value" th:text="${totalRooms}">0</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-xl">
+                <div class="dash-stat-card">
+                    <div class="dash-stat-icon"><i class="bi bi-people"></i></div>
+                    <div class="dash-stat-body">
+                        <div class="dash-stat-label">Khách hàng</div>
+                        <div class="dash-stat-value" th:text="${totalCustomers}">0</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-xl">
+                <div class="dash-stat-card">
+                    <div class="dash-stat-icon"><i class="bi bi-hourglass-split"></i></div>
+                    <div class="dash-stat-body">
+                        <div class="dash-stat-label">Chờ xác nhận</div>
+                        <div class="dash-stat-value" th:text="${pendingBookings}">0</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-xl">
+                <div class="dash-stat-card">
+                    <div class="dash-stat-icon"><i class="bi bi-check-circle"></i></div>
+                    <div class="dash-stat-body">
+                        <div class="dash-stat-label">Đã xác nhận</div>
+                        <div class="dash-stat-value" th:text="${confirmedBookings}">0</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-xl">
+                <div class="dash-stat-card dash-stat-card--gold">
+                    <div class="dash-stat-icon"><i class="bi bi-cash-stack"></i></div>
+                    <div class="dash-stat-body">
+                        <div class="dash-stat-label">Doanh thu</div>
+                        <div class="dash-stat-value" style="font-size:1rem">
+                            <span th:text="${#numbers.formatInteger(totalRevenue, 0, 'POINT')}">0</span>
+                            <span style="font-size:0.65rem;font-weight:500;opacity:0.6;margin-left:2px">VND</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart + quick actions row -->
+        <div class="row g-3 mb-4">
+            <!-- Revenue chart -->
+            <div class="col-lg-8">
+                <div class="dash-card h-100">
+                    <div class="dash-card-header">
+                        <div>
+                            <div class="dash-card-title">Doanh thu 6 tháng gần nhất</div>
+                            <div class="dash-card-sub">Tính theo ngày nhận phòng, không gồm booking đã huỷ</div>
+                        </div>
+                        <i class="bi bi-bar-chart-line" style="font-size:1.3rem;color:var(--gold)"></i>
+                    </div>
+                    <div class="dash-card-body">
+                        <canvas id="revenueChart" height="110"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Booking status donut -->
+            <div class="col-lg-4">
+                <div class="dash-card h-100">
+                    <div class="dash-card-header">
+                        <div class="dash-card-title">Trạng thái booking</div>
+                        <i class="bi bi-pie-chart" style="font-size:1.3rem;color:var(--gold)"></i>
+                    </div>
+                    <div class="dash-card-body d-flex flex-column align-items-center justify-content-center gap-3">
+                        <canvas id="statusChart" width="160" height="160" style="max-width:160px"></canvas>
+                        <div style="width:100%">
+                            <div class="d-flex justify-content-between align-items-center py-1" style="border-bottom:1px solid var(--border)">
+                                <span class="small d-flex align-items-center gap-2">
+                                    <span style="width:10px;height:10px;border-radius:50%;background:#c9a96e;display:inline-block"></span>Chờ xác nhận
+                                </span>
+                                <strong class="small" th:text="${pendingBookings}">0</strong>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center py-1" style="border-bottom:1px solid var(--border)">
+                                <span class="small d-flex align-items-center gap-2">
+                                    <span style="width:10px;height:10px;border-radius:50%;background:#0a1929;display:inline-block"></span>Đã xác nhận
+                                </span>
+                                <strong class="small" th:text="${confirmedBookings}">0</strong>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center py-1">
+                                <span class="small d-flex align-items-center gap-2">
+                                    <span style="width:10px;height:10px;border-radius:50%;background:#d0cfc9;display:inline-block"></span>Hoàn tất
+                                </span>
+                                <strong class="small" th:text="${completedBookings}">0</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent bookings -->
+        <div class="dash-card mb-4">
+            <div class="dash-card-header">
+                <div>
+                    <div class="dash-card-title">Đặt phòng gần đây</div>
+                    <div class="dash-card-sub">5 booking mới nhất</div>
+                </div>
+                <a th:href="@{/admin/bookings}" class="btn btn-sm" style="border:1.5px solid var(--navy);color:var(--navy);font-size:0.75rem;padding:0.3rem 0.9rem">
+                    Xem tất cả
+                </a>
+            </div>
+            <div class="table-luxury table-responsive">
+                <table class="table mb-0 align-middle">
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Khách hàng</th>
+                        <th>Phòng</th>
+                        <th>Nhận</th>
+                        <th>Trả</th>
+                        <th class="text-end">Tổng tiền</th>
+                        <th class="text-center">Trạng thái</th>
+                        <th class="text-center">Thanh toán</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="b : ${recentBookings}">
+                        <td><strong style="color:var(--gold-deep)">#<span th:text="${b.id}"></span></strong></td>
+                        <td th:text="${b.user != null ? b.user.fullName : '?'}"></td>
+                        <td th:text="${b.room != null ? 'Phòng ' + b.room.roomNumber : '?'}"></td>
+                        <td th:text="${#temporals.format(b.checkIn, 'dd/MM/yyyy')}"></td>
+                        <td th:text="${#temporals.format(b.checkOut, 'dd/MM/yyyy')}"></td>
+                        <td class="text-end"><strong th:text="${#numbers.formatInteger(b.totalPrice, 0, 'POINT')} + ' đ'"></strong></td>
+                        <td class="text-center">
+                            <span class="status-badge"
+                                  th:classappend="${b.status.name() == 'PENDING' ? 'status-pending' : (b.status.name() == 'CONFIRMED' ? 'status-confirmed' : (b.status.name() == 'COMPLETED' ? 'status-completed' : 'status-cancelled'))}"
+                                  th:text="${b.status.displayName}"></span>
+                        </td>
+                        <td class="text-center">
+                            <span class="status-badge"
+                                  th:classappend="${b.paymentStatus.name() == 'PAID'} ? 'status-paid' : 'status-unpaid'"
+                                  th:text="${b.paymentStatus.displayName}"></span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Quick links -->
+        <div class="row g-3">
+            <div class="col-md-4">
+                <a th:href="@{/admin/rooms/new}" class="dash-quick-link">
+                    <i class="bi bi-plus-circle"></i>
+                    <span>Thêm phòng mới</span>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a th:href="@{/admin/bookings?status=PENDING}" class="dash-quick-link">
+                    <i class="bi bi-hourglass-split"></i>
+                    <span>Booking chờ xác nhận</span>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a th:href="@{/admin/vouchers/new}" class="dash-quick-link">
+                    <i class="bi bi-ticket-perforated"></i>
+                    <span>Tạo voucher mới</span>
+                </a>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<style>
+    /* Stat cards */
+    .dash-stat-card {
+        background: #fff;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        border-top: 3px solid var(--navy);
+        box-shadow: var(--shadow-sm);
+        padding: 1.1rem 1.2rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    .dash-stat-card--gold { border-top-color: var(--gold-deep); }
+    .dash-stat-icon {
+        width: 44px; height: 44px; border-radius: 50%;
+        background: var(--navy);
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0;
+        font-size: 1.1rem; color: #fff;
+    }
+    .dash-stat-card--gold .dash-stat-icon { background: var(--gold-deep); }
+    .dash-stat-label { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.2rem; }
+    .dash-stat-value { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.35rem; color: var(--navy); line-height: 1; }
+
+    /* Generic dash card */
+    .dash-card {
+        background: #fff;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow-sm);
+        overflow: hidden;
+    }
+    .dash-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid var(--border);
+    }
+    .dash-card-title { font-family: 'Playfair Display', serif; font-weight: 600; font-size: 0.95rem; color: var(--navy); }
+    .dash-card-sub { font-size: 0.72rem; color: var(--text-muted); margin-top: 2px; }
+    .dash-card-body { padding: 1.25rem; }
+
+    /* Quick links */
+    .dash-quick-link {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.9rem 1.1rem;
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        box-shadow: var(--shadow-sm);
+        text-decoration: none;
+        color: var(--navy);
+        font-weight: 500;
+        font-size: 0.88rem;
+        transition: all .2s;
+    }
+    .dash-quick-link i { font-size: 1.15rem; color: var(--gold-deep); }
+    .dash-quick-link:hover {
+        border-color: var(--navy);
+        box-shadow: 0 4px 14px rgba(10,25,41,0.1);
+        transform: translateY(-2px);
+        color: var(--navy);
+    }
+</style>
+
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script th:inline="javascript">
+    // Live clock
+    function updateClock() {
+        const now = new Date();
+        document.getElementById('live-time').textContent =
+            now.toLocaleDateString('vi-VN') + ' ' + now.toLocaleTimeString('vi-VN');
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    // Revenue bar chart
+    const labels = /*[[${chartLabels}]]*/ [];
+    const data   = /*[[${chartData}]]*/ [];
+
+    new Chart(document.getElementById('revenueChart'), {
+        type: 'bar',
+        data: {
+            labels,
+            datasets: [{
+                label: 'Doanh thu (VND)',
+                data,
+                backgroundColor: 'rgba(10,25,41,0.82)',
+                borderRadius: 6,
+                borderSkipped: false,
+                hoverBackgroundColor: '#c9a96e'
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => ' ' + ctx.parsed.y.toLocaleString('vi-VN') + ' đ'
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: 'rgba(0,0,0,0.05)' },
+                    ticks: {
+                        font: { size: 11 },
+                        callback: v => v >= 1e6 ? (v/1e6).toFixed(1) + 'M' : v
+                    }
+                },
+                x: { grid: { display: false }, ticks: { font: { size: 11 } } }
+            }
+        }
+    });
+
+    // Status donut chart
+    const pending   = /*[[${pendingBookings}]]*/ 0;
+    const confirmed = /*[[${confirmedBookings}]]*/ 0;
+    const completed = /*[[${completedBookings}]]*/ 0;
+
+    new Chart(document.getElementById('statusChart'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Chờ xác nhận', 'Đã xác nhận', 'Hoàn tất'],
+            datasets: [{
+                data: [pending, confirmed, completed],
+                backgroundColor: ['#c9a96e', '#0a1929', '#d0cfc9'],
+                borderWidth: 0,
+                hoverOffset: 6
+            }]
+        },
+        options: {
+            cutout: '68%',
+            plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ' ' + ctx.label + ': ' + ctx.parsed } } }
+        }
+    });
+</script>
+</body>
+</html>

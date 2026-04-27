@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Quản lý đặt phòng')}"></head>
+<body>
+<div th:replace="~{fragments/layout :: admin-navbar}"></div>
+
+<div class="admin-layout">
+    <div th:replace="~{fragments/layout :: admin-sidebar}"></div>
+
+    <div class="admin-content">
+        <div class="mb-4">
+            <span class="section-tag">Admin</span>
+            <h2 class="mb-0">Quản lý đặt phòng</h2>
+        </div>
+
+        <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
+        <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+
+        <!-- Filter -->
+        <div class="bg-white p-3 rounded mb-4" style="box-shadow:var(--shadow-sm)">
+            <form th:action="@{/admin/bookings}" method="get" class="row g-2 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label small fw-600 mb-1">Tìm khách hàng / mã #</label>
+                    <input type="text" name="search" class="form-control"
+                           placeholder="Tên hoặc mã booking"
+                           th:value="${filterSearch}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-600 mb-1">Trạng thái booking</label>
+                    <select name="status" class="form-select">
+                        <option value="">Tất cả trạng thái</option>
+                        <option th:each="s : ${statuses}"
+                                th:value="${s.name()}"
+                                th:text="${s.displayName}"
+                                th:selected="${s == filterStatus}"></option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-600 mb-1">Trạng thái thanh toán</label>
+                    <select name="paymentStatus" class="form-select">
+                        <option value="">Tất cả thanh toán</option>
+                        <option th:each="p : ${paymentStatuses}"
+                                th:value="${p.name()}"
+                                th:text="${p.displayName}"
+                                th:selected="${p == filterPaymentStatus}"></option>
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex gap-2">
+                    <button class="btn btn-gold" type="submit">
+                        <i class="bi bi-funnel me-1"></i>Lọc
+                    </button>
+                    <a th:href="@{/admin/bookings}" class="btn btn-outline-secondary">Xoá lọc</a>
+                </div>
+            </form>
+        </div>
+
+        <div class="table-luxury table-responsive" th:if="${not #lists.isEmpty(bookings)}">
+            <table class="table mb-0 align-middle">
+                <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Khách hàng</th>
+                    <th>Phòng</th>
+                    <th>Nhận phòng</th>
+                    <th>Trả phòng</th>
+                    <th class="text-end">Tổng tiền</th>
+                    <th class="text-center">Voucher</th>
+                    <th class="text-center">Trạng thái</th>
+                    <th class="text-center">Thanh toán</th>
+                    <th class="text-center">PT thanh toán</th>
+                    <th class="text-center">Thông tin KH</th>
+                    <th class="text-end">Cập nhật</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="b : ${bookings}">
+                    <td><strong style="color:var(--gold-deep)">#<span th:text="${b.id}"></span></strong></td>
+                    <td>
+                        <div class="d-flex align-items-center gap-2">
+                            <div style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--gold-deep));display:flex;align-items:center;justify-content:center;color:var(--navy);font-weight:700;font-size:0.8rem;flex-shrink:0"
+                                 th:text="${b.user != null ? #strings.substring(b.user.fullName,0,1) : '?'}">?</div>
+                            <span th:text="${b.user != null ? b.user.fullName : '?'}"></span>
+                        </div>
+                    </td>
+                    <td>
+                        <strong th:if="${b.room != null}">Phòng <span th:text="${b.room.roomNumber}"></span></strong>
+                        <span th:if="${b.room == null}">?</span>
+                    </td>
+                    <td th:text="${#temporals.format(b.checkIn, 'dd/MM/yyyy')}"></td>
+                    <td th:text="${#temporals.format(b.checkOut, 'dd/MM/yyyy')}"></td>
+                    <td class="text-end">
+                        <strong style="color:var(--gold-deep)"
+                                th:text="${#numbers.formatInteger(b.totalPrice, 0, 'POINT')} + ' VND'"></strong>
+                    </td>
+                    <td class="text-center">
+                        <span th:if="${b.voucherCode != null}" class="badge"
+                              style="background:var(--navy);color:var(--gold);font-size:0.7rem"
+                              th:text="${b.voucherCode}"></span>
+                        <span th:if="${b.voucherCode == null}" class="text-muted small">—</span>
+                    </td>
+                    <td class="text-center">
+                        <span class="status-badge"
+                              th:classappend="${b.status.name() == 'PENDING'} ? 'status-pending' :
+                                              (${b.status.name() == 'CONFIRMED'} ? 'status-confirmed' :
+                                              (${b.status.name() == 'COMPLETED'} ? 'status-completed' : 'status-cancelled'))"
+                              th:text="${b.status.displayName}"></span>
+                    </td>
+                    <td class="text-center">
+                        <span class="status-badge"
+                              th:classappend="${b.paymentStatus.name() == 'PAID'} ? 'status-paid' : 'status-unpaid'"
+                              th:text="${b.paymentStatus.displayName}"></span>
+                    </td>
+                    <td class="text-center">
+                        <span class="text-muted small"
+                              th:text="${b.paymentMethod != null ? b.paymentMethod.displayName : 'Chuyển khoản ngân hàng'}"></span>
+                    </td>
+                    <td class="text-center">
+                        <div class="small">
+                            <div th:text="${b.customerFullName != null ? b.customerFullName : '-'}"></div>
+                            <div class="text-muted" th:text="${b.customerPhone != null ? b.customerPhone : '-'}"></div>
+                        </div>
+                    </td>
+                    <td class="text-end">
+                        <form th:action="@{/admin/bookings/{id}/status(id=${b.id})}" method="post"
+                              class="d-flex gap-1 mb-1">
+                            <select name="status" class="form-select form-select-sm" style="min-width:115px">
+                                <option th:each="s : ${statuses}"
+                                        th:value="${s.name()}"
+                                        th:text="${s.displayName}"
+                                        th:selected="${s == b.status}"></option>
+                            </select>
+                            <button class="btn btn-sm btn-navy" title="Cập nhật">
+                                <i class="bi bi-arrow-repeat"></i>
+                            </button>
+                        </form>
+                        <form th:if="${b.paymentStatus.name() == 'PENDING_CONFIRMATION' and b.status.name() != 'CANCELLED'}"
+                              th:action="@{/admin/bookings/{id}/confirm-payment(id=${b.id})}" method="post">
+                            <button class="btn btn-sm btn-gold" title="Xác nhận thanh toán">Xác nhận thanh toán</button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="text-center py-5" th:if="${#lists.isEmpty(bookings)}">
+            <i class="bi bi-journal-check fs-1 mb-3 text-muted"></i>
+            <h5>Chưa có booking nào</h5>
+        </div>
+    </div>
+</div>
+
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

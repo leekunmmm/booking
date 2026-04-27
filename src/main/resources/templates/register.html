@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Đăng ký')}"></head>
+<body style="margin:0;padding:0;min-height:100vh;display:flex;align-items:stretch;">
+
+<style>
+  body { background: #fff; }
+  .auth-left {
+    flex: 1;
+    min-height: 100vh;
+    background:
+      linear-gradient(rgba(5,13,20,0.5), rgba(5,13,20,0.65)),
+      url('https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=1400&q=85') center/cover no-repeat;
+    display: flex; flex-direction: column;
+    justify-content: space-between;
+    padding: 3rem;
+    color: #fff;
+  }
+  .auth-left .brand {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem; font-weight: 700;
+    letter-spacing: 3px;
+  }
+  .auth-left .brand span { color: var(--gold); }
+  .auth-left .tagline h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 3.5vw, 3rem);
+    font-weight: 700; line-height: 1.2;
+    letter-spacing: 0.04em; margin-bottom: 1rem;
+  }
+  .auth-left .tagline p {
+    font-family: 'Lato', sans-serif; font-weight: 400;
+    font-size: 1rem; opacity: 0.8; line-height: 1.8;
+    max-width: 400px;
+  }
+  .auth-left .benefits { list-style: none; padding: 0; margin: 0; }
+  .auth-left .benefits li {
+    font-family: 'Lato', sans-serif; font-size: 0.9rem;
+    opacity: 0.85; padding: 0.35rem 0;
+    display: flex; align-items: center; gap: 0.6rem;
+  }
+  .auth-left .benefits li i { color: var(--gold); }
+
+  .auth-right {
+    width: 520px; flex-shrink: 0;
+    background: #fff;
+    display: flex; align-items: center; justify-content: center;
+    padding: 3rem 3.5rem;
+    min-height: 100vh;
+    overflow-y: auto;
+  }
+  .auth-right-inner { width: 100%; }
+  .auth-right h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem; letter-spacing: 0.03em;
+    color: var(--navy); margin-bottom: 0.4rem;
+  }
+  .auth-right .subtitle {
+    font-family: 'Lato', sans-serif;
+    font-size: 0.9rem; color: var(--text-muted);
+    margin-bottom: 2rem;
+  }
+  .lux-field { margin-bottom: 1.5rem; }
+  .lux-field label {
+    display: block;
+    font-family: 'Lato', sans-serif;
+    font-size: 0.68rem; font-weight: 700;
+    letter-spacing: 2px; text-transform: uppercase;
+    color: var(--text-muted); margin-bottom: 0.45rem;
+  }
+  .lux-field input {
+    width: 100%;
+    border: none; border-bottom: 1.5px solid var(--border);
+    background: transparent;
+    padding: 0.6rem 0;
+    font-family: 'Lato', sans-serif;
+    font-size: 0.97rem; color: var(--navy);
+    outline: none; transition: border-color .2s;
+    border-radius: 0;
+  }
+  .lux-field input:focus { border-bottom-color: var(--gold); }
+  .lux-field input::placeholder { color: #bbb; }
+
+  @media (max-width: 768px) {
+    .auth-left { display: none; }
+    .auth-right { width: 100%; padding: 2rem 1.5rem; }
+  }
+</style>
+
+<!-- LEFT -->
+<div class="auth-left">
+  <div class="brand">Luxe<span>Haven</span></div>
+  <div class="tagline">
+    <h2>Trở thành<br>thành viên</h2>
+    <p>Tận hưởng ưu đãi thành viên độc quyền và trải nghiệm dịch vụ 5 sao tại LuxeHaven.</p>
+  </div>
+  <ul class="benefits">
+    <li><i class="bi bi-check-circle-fill"></i> Đặt phòng nhanh chóng, xác nhận tức thì</li>
+    <li><i class="bi bi-check-circle-fill"></i> Tích điểm thành viên với mỗi lần lưu trú</li>
+    <li><i class="bi bi-check-circle-fill"></i> Ưu đãi voucher độc quyền cho thành viên</li>
+    <li><i class="bi bi-check-circle-fill"></i> Theo dõi lịch sử đặt phòng dễ dàng</li>
+  </ul>
+</div>
+
+<!-- RIGHT -->
+<div class="auth-right">
+  <div class="auth-right-inner">
+    <div style="margin-bottom:2rem">
+      <div style="width:44px;height:3px;background:var(--gold);margin-bottom:1.5rem"></div>
+      <h3>Tạo tài khoản</h3>
+      <p class="subtitle">Điền thông tin để bắt đầu hành trình của bạn</p>
+    </div>
+
+    <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+
+    <form th:action="@{/register}" method="post" th:object="${registerForm}">
+      <div class="lux-field">
+        <label>Tên đăng nhập *</label>
+        <input type="text" th:field="*{username}" placeholder="Tối thiểu 3 ký tự" required>
+      </div>
+      <div class="row g-3">
+        <div class="col-6">
+          <div class="lux-field">
+            <label>Mật khẩu *</label>
+            <input type="password" th:field="*{password}" placeholder="Ít nhất 6 ký tự" required>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="lux-field">
+            <label>Xác nhận *</label>
+            <input type="password" th:field="*{confirmPassword}" placeholder="Nhập lại" required>
+          </div>
+        </div>
+      </div>
+      <div class="lux-field">
+        <label>Họ và tên *</label>
+        <input type="text" th:field="*{fullName}" placeholder="Nguyễn Văn A" required>
+      </div>
+      <div class="lux-field">
+        <label>Email *</label>
+        <input type="email" th:field="*{email}" placeholder="email@example.com" required>
+      </div>
+      <div class="lux-field">
+        <label>Số điện thoại</label>
+        <input type="text" th:field="*{phone}" placeholder="0901 234 567">
+      </div>
+
+      <button type="submit" class="btn btn-gold w-100" style="padding:1rem;font-size:0.78rem;margin-top:0.5rem">
+        Tạo tài khoản
+      </button>
+    </form>
+
+    <p style="text-align:center;margin-top:1.75rem;font-size:0.88rem;color:var(--text-muted)">
+      Đã có tài khoản?
+      <a th:href="@{/login}" style="color:var(--gold-deep);font-weight:700">Đăng nhập</a>
+    </p>
+    <a th:href="@{/}" style="display:flex;align-items:center;gap:0.4rem;justify-content:center;
+       margin-top:0.75rem;font-size:0.82rem;color:var(--text-muted)">
+      <i class="bi bi-arrow-left"></i> Về trang chủ
+    </a>
+  </div>
+</div>
+
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

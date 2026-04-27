@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Đăng nhập')}"></head>
+<body style="margin:0;padding:0;min-height:100vh;display:flex;align-items:stretch;">
+
+<style>
+  body { background: #fff; }
+  .auth-left {
+    flex: 1;
+    min-height: 100vh;
+    background:
+      linear-gradient(rgba(5,13,20,0.52), rgba(5,13,20,0.68)),
+      url('https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=1400&q=85') center/cover no-repeat;
+    display: flex; flex-direction: column;
+    justify-content: space-between;
+    padding: 3rem;
+    color: #fff;
+  }
+  .auth-left .brand {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem; font-weight: 700;
+    letter-spacing: 3px; color: #fff;
+  }
+  .auth-left .brand span { color: var(--gold); }
+  .auth-left .tagline { max-width: 420px; }
+  .auth-left .tagline h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 3.5vw, 3rem);
+    font-weight: 700; line-height: 1.2;
+    letter-spacing: 0.04em; margin-bottom: 1rem;
+  }
+  .auth-left .tagline p {
+    font-family: 'Lato', sans-serif;
+    font-weight: 400; font-size: 1rem;
+    opacity: 0.8; line-height: 1.8;
+  }
+  .auth-left .quote {
+    font-family: 'Playfair Display', serif;
+    font-style: italic; opacity: 0.6;
+    font-size: 0.9rem; border-left: 2px solid var(--gold);
+    padding-left: 1rem;
+  }
+
+  .auth-right {
+    width: 480px; flex-shrink: 0;
+    background: #fff;
+    display: flex; align-items: center; justify-content: center;
+    padding: 3rem 3.5rem;
+    min-height: 100vh;
+  }
+  .auth-right-inner { width: 100%; }
+
+  .auth-right h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem; letter-spacing: 0.03em;
+    color: var(--navy); margin-bottom: 0.4rem;
+  }
+  .auth-right .subtitle {
+    font-family: 'Lato', sans-serif;
+    font-size: 0.9rem; color: var(--text-muted);
+    margin-bottom: 2.5rem;
+  }
+
+  .lux-field { margin-bottom: 1.75rem; }
+  .lux-field label {
+    display: block;
+    font-family: 'Lato', sans-serif;
+    font-size: 0.68rem; font-weight: 700;
+    letter-spacing: 2px; text-transform: uppercase;
+    color: var(--text-muted); margin-bottom: 0.5rem;
+  }
+  .lux-field .field-wrap { position: relative; }
+  .lux-field .field-wrap i {
+    position: absolute; left: 0; top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted); font-size: 1rem;
+    pointer-events: none;
+  }
+  .lux-field input {
+    width: 100%;
+    border: none; border-bottom: 1.5px solid var(--border);
+    background: transparent;
+    padding: 0.65rem 0 0.65rem 1.75rem;
+    font-family: 'Lato', sans-serif;
+    font-size: 1rem; color: var(--navy);
+    outline: none; transition: border-color .2s;
+    border-radius: 0;
+  }
+  .lux-field input:focus { border-bottom-color: var(--gold); }
+  .lux-field input::placeholder { color: #bbb; font-weight: 400; }
+
+  .demo-box {
+    background: var(--cream);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.9rem 1rem;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin-top: 1.5rem;
+  }
+  .demo-box code {
+    background: var(--navy); color: var(--gold);
+    padding: 1px 6px; border-radius: 3px;
+    font-size: 0.8rem;
+  }
+
+  @media (max-width: 768px) {
+    .auth-left { display: none; }
+    .auth-right { width: 100%; padding: 2rem 1.5rem; }
+  }
+</style>
+
+<!-- LEFT: Image + Branding -->
+<div class="auth-left">
+  <div class="brand">Luxe<span>Haven</span></div>
+  <div class="tagline">
+    <h2>Chào mừng<br>trở lại</h2>
+    <p>Đăng nhập để tiếp tục hành trình nghỉ dưỡng sang trọng cùng LuxeHaven Hotel.</p>
+  </div>
+  <div class="quote">
+    "Luxury is in each detail."<br>
+    <small style="opacity:0.7">— Hubert de Givenchy</small>
+  </div>
+</div>
+
+<!-- RIGHT: Form -->
+<div class="auth-right">
+  <div class="auth-right-inner">
+    <div style="margin-bottom:2.5rem">
+      <div style="width:44px;height:3px;background:var(--gold);margin-bottom:1.5rem"></div>
+      <h3>Đăng nhập</h3>
+      <p class="subtitle">Nhập thông tin tài khoản của bạn để tiếp tục</p>
+    </div>
+
+    <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
+    <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+
+    <form th:action="@{/login}" method="post" th:object="${loginForm}">
+      <div class="lux-field">
+        <label>Tên đăng nhập</label>
+        <div class="field-wrap">
+          <i class="bi bi-person"></i>
+          <input type="text" th:field="*{username}" placeholder="Nhập tên đăng nhập" required autofocus>
+        </div>
+      </div>
+      <div class="lux-field">
+        <label>Mật khẩu</label>
+        <div class="field-wrap">
+          <i class="bi bi-lock"></i>
+          <input type="password" th:field="*{password}" placeholder="Nhập mật khẩu" required>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-gold w-100" style="padding:1rem;font-size:0.78rem;margin-top:0.5rem">
+        Đăng nhập
+      </button>
+    </form>
+
+    <p style="text-align:center;margin-top:1.75rem;font-size:0.88rem;color:var(--text-muted)">
+      Chưa có tài khoản?
+      <a th:href="@{/register}" style="color:var(--gold-deep);font-weight:700">Đăng ký ngay</a>
+    </p>
+
+    <a th:href="@{/}" style="display:flex;align-items:center;gap:0.4rem;justify-content:center;
+       margin-top:1rem;font-size:0.82rem;color:var(--text-muted)">
+      <i class="bi bi-arrow-left"></i> Về trang chủ
+    </a>
+  </div>
+</div>
+
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

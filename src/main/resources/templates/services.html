@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Dịch vụ')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<style>
+    .services-hero {
+        min-height: 55vh;
+        display: flex; align-items: center; justify-content: center;
+        background: linear-gradient(rgba(10,25,41,0.6), rgba(10,25,41,0.72)),
+                    url('https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=1920&q=80') center/cover;
+        color: var(--white);
+        text-align: center;
+    }
+    .services-hero h1 {
+        font-size: clamp(2rem, 5vw, 3.8rem);
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin-bottom: 1rem;
+    }
+
+    .service-section { padding: 5rem 0; }
+    .service-section:nth-child(even) { background: var(--white); }
+
+    .service-img {
+        border-radius: 6px; overflow: hidden;
+        box-shadow: var(--shadow-lg);
+        height: 420px;
+    }
+    .service-img img {
+        width: 100%; height: 100%;
+        object-fit: cover;
+        transition: transform .8s;
+    }
+    .service-img:hover img { transform: scale(1.05); }
+
+    .service-check-list { list-style: none; padding: 0; margin: 0; }
+    .service-check-list li {
+        padding: 0.5rem 0;
+        font-size: 0.95rem;
+        color: var(--text-muted);
+        display: flex; align-items: flex-start; gap: 0.75rem;
+        border-bottom: 1px solid var(--border);
+    }
+    .service-check-list li:last-child { border-bottom: none; }
+    .service-check-list li i { color: var(--gold); font-size: 1rem; margin-top: 2px; flex-shrink: 0; }
+
+    .stat-pill {
+        display: inline-flex; align-items: center; gap: 0.5rem;
+        background: var(--cream); border: 1px solid var(--border);
+        border-radius: 30px; padding: 0.4rem 1rem;
+        font-size: 0.82rem; font-weight: 600; color: var(--navy);
+    }
+    .stat-pill i { color: var(--gold); }
+
+    .highlight-card {
+        background: var(--navy);
+        color: var(--white); border-radius: 6px;
+        padding: 1.5rem; text-align: center;
+        height: 100%;
+    }
+    .highlight-card i { font-size: 2rem; color: var(--gold); display: block; margin-bottom: 0.75rem; }
+    .highlight-card strong { font-family: 'Playfair Display', serif; font-size: 1.1rem; }
+    .highlight-card small { opacity: 0.7; font-size: 0.82rem; }
+</style>
+
+<!-- HERO -->
+<section class="services-hero">
+    <div>
+        <span class="section-tag">Dịch vụ đẳng cấp</span>
+        <h1>Sự hoàn hảo<br>trong từng chi tiết</h1>
+        <p style="font-size:1.1rem;opacity:0.85;max-width:600px;margin:0 auto">
+            Mỗi dịch vụ tại LuxeHaven được thiết kế để mang đến trải nghiệm<br>vượt trên cả mong đợi của bạn.
+        </p>
+    </div>
+</section>
+
+<!-- STAT HIGHLIGHTS -->
+<div class="container" style="margin-top:-36px;position:relative;z-index:5;">
+    <div class="auth-card">
+        <div class="card-body p-4">
+            <div class="row text-center g-3">
+                <div class="col-6 col-md-3">
+                    <div style="font-family:'Playfair Display',serif;font-size:2.2rem;color:var(--gold-deep);font-weight:700">15+</div>
+                    <div class="small text-muted">Loại dịch vụ</div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div style="font-family:'Playfair Display',serif;font-size:2.2rem;color:var(--gold-deep);font-weight:700">24/7</div>
+                    <div class="small text-muted">Hỗ trợ liên tục</div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div style="font-family:'Playfair Display',serif;font-size:2.2rem;color:var(--gold-deep);font-weight:700">1K+</div>
+                    <div class="small text-muted">Khách hài lòng/năm</div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div style="font-family:'Playfair Display',serif;font-size:2.2rem;color:var(--gold-deep);font-weight:700">5★</div>
+                    <div class="small text-muted">Đánh giá trung bình</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SERVICE 1: RESTAURANT -->
+<section class="service-section">
+    <div class="container">
+        <div class="row g-5 align-items-center">
+            <div class="col-lg-6">
+                <div class="service-img">
+                    <img src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1200&q=80" alt="Nhà hàng The Imperial">
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <span class="section-tag">Ẩm thực</span>
+                <h2 class="mb-1">The Imperial Restaurant</h2>
+                <p class="text-muted mb-4">
+                    Không gian ẩm thực đẳng cấp quốc tế với thực đơn được thiết kế bởi
+                    các bếp trưởng nổi tiếng. Kết hợp tinh hoa Á–Âu trong từng món ăn,
+                    phục vụ ngay tại tầng 2 với view nhìn ra thành phố.
+                </p>
+                <ul class="service-check-list mb-4">
+                    <li><i class="bi bi-check-circle-fill"></i>Thực đơn à la carte đa dạng, thay đổi theo mùa</li>
+                    <li><i class="bi bi-check-circle-fill"></i>Hầm rượu vang cao cấp hơn 500 loại từ khắp thế giới</li>
+                    <li><i class="bi bi-check-circle-fill"></i>Phòng ăn riêng tư cho sự kiện và tiệc doanh nghiệp</li>
+                    <li><i class="bi bi-check-circle-fill"></i>Bữa sáng buffet miễn phí cho khách lưu trú</li>
+                    <li><i class="bi bi-check-circle-fill"></i>Phục vụ tại phòng (room service) 24 giờ</li>
+                </ul>
+                <div class="d-flex flex-wrap gap-2 mb-4">
+                    <span class="stat-pill"><i class="bi bi-clock"></i> 06:00 – 23:00</span>
+                    <span class="stat-pill"><i class="bi bi-people"></i> 120 chỗ ngồi</span>
+                    <span class="stat-pill"><i class="bi bi-trophy"></i> Michelin recommended</span>
+                </div>
+                <a th:href="@{/contact}" class="btn btn-gold">
+                    <i class="bi bi-calendar-check me-2"></i>Đặt bàn ngay
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SERVICE 2: SPA (reversed) -->
+<section class="service-section">
+    <div class="container">
+        <div class="row g-5 align-items-center flex-lg-row-reverse">
+            <div class="col-lg-6">
+                <div class="service-img">
+                    <img src="https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=1200&q=80" alt="Serenity Spa">
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <span class="section-tag">Sức khoẻ & Thư giãn</span>
+                <h2 class="mb-1">Serenity Spa & Wellness</h2>
+                <p class="text-muted mb-4">
+                    Trung tâm Spa cao cấp với 15 phòng trị liệu riêng biệt, kết hợp
+                    phương pháp phương Đông truyền thống và công nghệ chăm sóc hiện đại.
+                    Không gian yên tĩnh, nhiệt độ kiểm soát hoàn hảo để giúp bạn thư giãn tối đa.
+                </p>
+                <ul class="service-check-list mb-4">
+                    <li><i class="bi bi-check-circle-fill"></i>Massage đá nóng & liệu pháp thảo dược truyền thống</li>
+                    <li><i class="bi bi-check-circle-fill"></i>Sauna khô & ướt, phòng xông hơi thảo dược</li>
+                    <li><i class="bi bi-check-circle-fill"></i>Jacuzzi riêng cho couple, phòng trị liệu đôi</li>
+                    <li><i class="bi bi-check-circle-fill"></i>Gói chăm sóc da mặt cao cấp với mỹ phẩm La Prairie</li>
+                    <li><i class="bi bi-check-circle-fill"></i>Ưu đãi 20% cho khách lưu trú tại khách sạn</li>
+                </ul>
+                <div class="d-flex flex-wrap gap-2 mb-4">
+                    <span class="stat-pill"><i class="bi bi-clock"></i> 08:00 – 22:00</span>
+                    <span class="stat-pill"><i class="bi bi-door-open"></i> 15 phòng trị liệu</span>
+                    <span class="stat-pill"><i class="bi bi-stars"></i> 5-star rated</span>
+                </div>
+                <a th:href="@{/contact}" class="btn btn-gold">
+                    <i class="bi bi-calendar-check me-2"></i>Đặt lịch Spa
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SERVICE 3: POOL & BAR -->
+<section class="service-section">
+    <div class="container">
+        <div class="row g-5 align-items-center">
+            <div class="col-lg-6">
+                <div class="service-img">
+                    <img src="https://images.unsplash.com/photo-1613395877344-13d4a8e0d49e?w=1200&q=80" alt="Infinity Sky Pool">
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <span class="section-tag">Giải trí & Thể thao</span>
+                <h2 class="mb-1">Infinity Sky Pool & Bar</h2>
+                <p class="text-muted mb-4">
+                    Hồ bơi vô cực tầng thượng với tầm nhìn 360° toàn thành phố —
+                    điểm đến hot nhất tại TP.HCM. Sky Bar phục vụ cocktail thủ công
+                    và âm nhạc live vào cuối tuần, tạo ra trải nghiệm không thể quên.
+                </p>
+                <ul class="service-check-list mb-4">
+                    <li><i class="bi bi-check-circle-fill"></i>Hồ bơi vô cực 50m, nước muối, view toàn thành phố</li>
+                    <li><i class="bi bi-check-circle-fill"></i>Cabana riêng tư với dịch vụ butler bên hồ bơi</li>
+                    <li><i class="bi bi-check-circle-fill"></i>Sky Bar tầng 25 với menu cocktail độc quyền</li>
+                    <li><i class="bi bi-check-circle-fill"></i>Live music & DJ vào thứ 6, 7, Chủ nhật</li>
+                    <li><i class="bi bi-check-circle-fill"></i>Phòng gym & sân tennis trong nhà, yoga buổi sáng</li>
+                </ul>
+                <div class="d-flex flex-wrap gap-2 mb-4">
+                    <span class="stat-pill"><i class="bi bi-clock"></i> 07:00 – 22:00</span>
+                    <span class="stat-pill"><i class="bi bi-water"></i> Tầng 25</span>
+                    <span class="stat-pill"><i class="bi bi-music-note-beamed"></i> Live music cuối tuần</span>
+                </div>
+                <a th:href="@{/rooms}" class="btn btn-gold">
+                    <i class="bi bi-calendar-check me-2"></i>Đặt phòng để trải nghiệm
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

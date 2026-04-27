@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Quản lý khách hàng')}"></head>
+<body>
+<div th:replace="~{fragments/layout :: admin-navbar}"></div>
+
+<div class="admin-layout">
+    <div th:replace="~{fragments/layout :: admin-sidebar}"></div>
+
+    <div class="admin-content">
+        <div class="mb-4">
+            <span class="section-tag">Admin</span>
+            <h2 class="mb-0">Quản lý khách hàng</h2>
+        </div>
+
+        <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
+        <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+
+        <!-- Filter -->
+        <div class="bg-white p-3 rounded mb-4" style="box-shadow:var(--shadow-sm)">
+            <form th:action="@{/admin/customers}" method="get" class="row g-2 align-items-end">
+                <div class="col-md-5">
+                    <label class="form-label small fw-600 mb-1">Tìm kiếm</label>
+                    <input type="text" name="search" class="form-control"
+                           placeholder="Tên, tên đăng nhập hoặc email"
+                           th:value="${filterSearch}">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small fw-600 mb-1">Hạng thành viên</label>
+                    <select name="tier" class="form-select">
+                        <option value="">Tất cả hạng</option>
+                        <option th:each="t : ${memberTiers}"
+                                th:value="${t.name()}"
+                                th:text="${t.displayName}"
+                                th:selected="${t.name() == filterTier}"></option>
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex gap-2">
+                    <button class="btn btn-gold" type="submit">
+                        <i class="bi bi-funnel me-1"></i>Lọc
+                    </button>
+                    <a th:href="@{/admin/customers}" class="btn btn-outline-secondary">Xoá lọc</a>
+                </div>
+            </form>
+        </div>
+
+        <div class="table-luxury table-responsive">
+            <table class="table mb-0 align-middle">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Tên đăng nhập</th>
+                    <th>Họ tên</th>
+                    <th>Email</th>
+                    <th>Điện thoại</th>
+                    <th class="text-end">Chi tiêu (đã thanh toán)</th>
+                    <th class="text-center">Hạng thành viên</th>
+                    <th>Ngày tạo</th>
+                    <th class="text-end">Thao tác</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="c : ${customers}">
+                    <td>
+                        <span class="text-muted" th:text="${c.id}"></span>
+                    </td>
+                    <td>
+                        <strong style="color:var(--navy)" th:text="${c.username}"></strong>
+                    </td>
+                    <td th:text="${c.fullName}"></td>
+                    <td th:text="${c.email}"></td>
+                    <td th:text="${c.phone != null ? c.phone : '—'}"></td>
+                    <td class="text-end" th:with="spent=${spendingMap[c.id]}">
+                        <span th:if="${c.role.name() == 'ADMIN'}" class="text-muted small">—</span>
+                        <span th:unless="${c.role.name() == 'ADMIN'}"
+                              th:text="${#numbers.formatInteger(spent != null ? spent : 0, 0, 'POINT') + ' ₫'}"></span>
+                    </td>
+                    <td class="text-center">
+                        <span th:if="${c.role.name() == 'ADMIN'}" class="text-muted small">—</span>
+                        <th:block th:unless="${c.role.name() == 'ADMIN'}"
+                                  th:with="tier=${tierMap[c.id]}">
+                            <span th:if="${tier == null}"                              class="tier-badge tier-bronze">Bronze</span>
+                            <span th:if="${tier != null and tier.name() == 'BRONZE'}"  class="tier-badge tier-bronze">Bronze</span>
+                            <span th:if="${tier != null and tier.name() == 'SILVER'}"  class="tier-badge tier-silver">Silver</span>
+                            <span th:if="${tier != null and tier.name() == 'GOLD'}"    class="tier-badge tier-gold">Gold</span>
+                            <span th:if="${tier != null and tier.name() == 'DIAMOND'}" class="tier-badge tier-diamond">Diamond</span>
+                            <span th:if="${tier != null and tier.name() == 'VIP'}"     class="tier-badge tier-vip">VIP</span>
+                        </th:block>
+                    </td>
+                    <td>
+                        <span th:if="${c.createdAt}" 
+                              th:text="${#temporals.format(c.createdAt, 'dd/MM/yyyy HH:mm')}"></span>
+                        <span th:unless="${c.createdAt}" class="text-muted">—</span>
+                    </td>
+                    <td class="text-end">
+                        <form th:action="@{/admin/customers/{id}/delete(id=${c.id})}" method="post"
+                              class="d-inline"
+                              onsubmit="return confirm('Bạn có chắc chắn muốn xoá khách hàng này?')">
+                            <button type="submit" class="btn btn-sm btn-outline-danger"
+                                    th:disabled="${c.role.name() == 'ADMIN'}">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(customers)}">
+                    <td colspan="9" class="text-center py-4 text-muted">
+                        <i class="bi bi-people fs-1 d-block mb-2"></i>
+                        Chưa có khách hàng nào
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+.tier-badge {
+    display: inline-block; padding: 0.25rem 0.65rem;
+    border-radius: 20px; font-size: 0.72rem; font-weight: 600;
+    letter-spacing: 0.04em;
+}
+.tier-bronze  { background:#fdf0e0; color:#a0522d; }
+.tier-silver  { background:#f0f0f0; color:#555; }
+.tier-gold    { background:#fef3cd; color:#856404; }
+.tier-diamond { background:#e8f4fd; color:#2980b9; }
+.tier-vip     { background:#f5eefa; color:#6c3483; }
+</style>
+<div th:replace="~{fragments/layout :: scripts}"></div>
+</body>
+</html>
