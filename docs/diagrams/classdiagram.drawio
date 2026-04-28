@@ -1,0 +1,155 @@
+<mxfile host="app.diagrams.net" version="21.0.0">
+  <diagram name="Class Diagram LuxeHaven" id="class-luxehaven">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title -->
+        <mxCell id="title" value="Class Diagram – LuxeHaven Booking System" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=18;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="400" y="15" width="700" height="35" as="geometry" />
+        </mxCell>
+
+        <!-- ========== CLASS: User ========== -->
+        <mxCell id="cls-user" value="User" style="swimlane;fontStyle=1;align=center;startSize=26;fillColor=#1F497D;fontColor=#ffffff;strokeColor=#1F497D;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="40" y="70" width="230" height="270" as="geometry" />
+        </mxCell>
+        <mxCell id="user-attrs" value="- id : Long&#xa;- username : String&#xa;- password : String&#xa;- fullName : String&#xa;- email : String&#xa;- phone : String&#xa;- role : Role&#xa;- avatarUrl : String&#xa;- memberTier : String&#xa;- createdAt : LocalDateTime" style="text;html=1;align=left;verticalAlign=top;spacingLeft=8;whiteSpace=pre;" vertex="1" parent="cls-user">
+          <mxGeometry x="0" y="26" width="230" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="user-sep" value="" style="line;strokeColor=#1F497D;" vertex="1" parent="cls-user">
+          <mxGeometry x="0" y="206" width="230" height="10" as="geometry" />
+        </mxCell>
+        <mxCell id="user-methods" value="+ isAdmin() : boolean" style="text;html=1;align=left;verticalAlign=top;spacingLeft=8;" vertex="1" parent="cls-user">
+          <mxGeometry x="0" y="216" width="230" height="45" as="geometry" />
+        </mxCell>
+
+        <!-- ========== CLASS: Room ========== -->
+        <mxCell id="cls-room" value="Room" style="swimlane;fontStyle=1;align=center;startSize=26;fillColor=#1F497D;fontColor=#ffffff;strokeColor=#1F497D;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="900" y="70" width="250" height="300" as="geometry" />
+        </mxCell>
+        <mxCell id="room-attrs" value="- id : Long&#xa;- roomNumber : String&#xa;- type : RoomType&#xa;- pricePerNight : double&#xa;- capacity : int&#xa;- description : String&#xa;- status : RoomStatus&#xa;- imagesRaw : String&#xa;- amenitiesRaw : String" style="text;html=1;align=left;verticalAlign=top;spacingLeft=8;whiteSpace=pre;" vertex="1" parent="cls-room">
+          <mxGeometry x="0" y="26" width="250" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="room-sep" value="" style="line;strokeColor=#1F497D;" vertex="1" parent="cls-room">
+          <mxGeometry x="0" y="206" width="250" height="10" as="geometry" />
+        </mxCell>
+        <mxCell id="room-methods" value="+ getImages() : List&lt;String&gt;&#xa;+ getAmenities() : List&lt;Amenity&gt;&#xa;+ getFirstImage() : String" style="text;html=1;align=left;verticalAlign=top;spacingLeft=8;" vertex="1" parent="cls-room">
+          <mxGeometry x="0" y="216" width="250" height="75" as="geometry" />
+        </mxCell>
+
+        <!-- ========== CLASS: Booking ========== -->
+        <mxCell id="cls-booking" value="Booking" style="swimlane;fontStyle=1;align=center;startSize=26;fillColor=#1F497D;fontColor=#ffffff;strokeColor=#1F497D;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="430" y="70" width="270" height="420" as="geometry" />
+        </mxCell>
+        <mxCell id="bk-attrs" value="- id : Long&#xa;- userId : Long&#xa;- roomId : Long&#xa;- checkIn : LocalDate&#xa;- checkOut : LocalDate&#xa;- totalPrice : double&#xa;- status : BookingStatus&#xa;- paymentStatus : PaymentStatus&#xa;- paymentMethod : PaymentMethod&#xa;- customerFullName : String&#xa;- customerPhone : String&#xa;- customerEmail : String&#xa;- customerNote : String&#xa;- voucherCode : String&#xa;- createdAt : LocalDateTime" style="text;html=1;align=left;verticalAlign=top;spacingLeft=8;whiteSpace=pre;" vertex="1" parent="cls-booking">
+          <mxGeometry x="0" y="26" width="270" height="330" as="geometry" />
+        </mxCell>
+        <mxCell id="bk-sep" value="" style="line;strokeColor=#1F497D;" vertex="1" parent="cls-booking">
+          <mxGeometry x="0" y="356" width="270" height="10" as="geometry" />
+        </mxCell>
+        <mxCell id="bk-methods" value="+ getNumberOfNights() : long" style="text;html=1;align=left;verticalAlign=top;spacingLeft=8;" vertex="1" parent="cls-booking">
+          <mxGeometry x="0" y="366" width="270" height="45" as="geometry" />
+        </mxCell>
+
+        <!-- ========== CLASS: Voucher ========== -->
+        <mxCell id="cls-voucher" value="Voucher" style="swimlane;fontStyle=1;align=center;startSize=26;fillColor=#1F497D;fontColor=#ffffff;strokeColor=#1F497D;fontSize=13;" vertex="1" parent="1">
+          <mxGeometry x="430" y="540" width="270" height="270" as="geometry" />
+        </mxCell>
+        <mxCell id="vc-attrs" value="- id : Long&#xa;- code : String&#xa;- discountPercent : int&#xa;- validUntil : LocalDate&#xa;- maxUses : int&#xa;- usedCount : int&#xa;- active : boolean&#xa;- targetTier : String" style="text;html=1;align=left;verticalAlign=top;spacingLeft=8;whiteSpace=pre;" vertex="1" parent="cls-voucher">
+          <mxGeometry x="0" y="26" width="270" height="190" as="geometry" />
+        </mxCell>
+        <mxCell id="vc-sep" value="" style="line;strokeColor=#1F497D;" vertex="1" parent="cls-voucher">
+          <mxGeometry x="0" y="216" width="270" height="10" as="geometry" />
+        </mxCell>
+        <mxCell id="vc-methods" value="+ isUsable() : boolean" style="text;html=1;align=left;verticalAlign=top;spacingLeft=8;" vertex="1" parent="cls-voucher">
+          <mxGeometry x="0" y="226" width="270" height="35" as="geometry" />
+        </mxCell>
+
+        <!-- ========== ENUMs ========== -->
+        <mxCell id="en-role" value="&lt;&lt;enum&gt;&gt;&#xa;Role" style="swimlane;fontStyle=3;align=center;startSize=40;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="40" y="390" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="en-role-v" value="CUSTOMER&#xa;ADMIN" style="text;html=1;align=left;verticalAlign=top;spacingLeft=10;" vertex="1" parent="en-role">
+          <mxGeometry x="0" y="40" width="160" height="35" as="geometry" />
+        </mxCell>
+
+        <mxCell id="en-roomtype" value="&lt;&lt;enum&gt;&gt;&#xa;RoomType" style="swimlane;fontStyle=3;align=center;startSize=40;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="900" y="420" width="160" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="en-roomtype-v" value="STANDARD&#xa;DELUXE&#xa;SUITE" style="text;html=1;align=left;verticalAlign=top;spacingLeft=10;" vertex="1" parent="en-roomtype">
+          <mxGeometry x="0" y="40" width="160" height="45" as="geometry" />
+        </mxCell>
+
+        <mxCell id="en-roomstatus" value="&lt;&lt;enum&gt;&gt;&#xa;RoomStatus" style="swimlane;fontStyle=3;align=center;startSize=40;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="1080" y="420" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="en-roomstatus-v" value="AVAILABLE&#xa;MAINTENANCE" style="text;html=1;align=left;verticalAlign=top;spacingLeft=10;" vertex="1" parent="en-roomstatus">
+          <mxGeometry x="0" y="40" width="160" height="35" as="geometry" />
+        </mxCell>
+
+        <mxCell id="en-bkstatus" value="&lt;&lt;enum&gt;&gt;&#xa;BookingStatus" style="swimlane;fontStyle=3;align=center;startSize=40;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="700" y="540" width="160" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="en-bkstatus-v" value="PENDING&#xa;CONFIRMED&#xa;CANCELLED&#xa;COMPLETED" style="text;html=1;align=left;verticalAlign=top;spacingLeft=10;" vertex="1" parent="en-bkstatus">
+          <mxGeometry x="0" y="40" width="160" height="55" as="geometry" />
+        </mxCell>
+
+        <mxCell id="en-paystatus" value="&lt;&lt;enum&gt;&gt;&#xa;PaymentStatus" style="swimlane;fontStyle=3;align=center;startSize=40;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="700" y="660" width="160" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="en-paystatus-v" value="UNPAID&#xa;PAID" style="text;html=1;align=left;verticalAlign=top;spacingLeft=10;" vertex="1" parent="en-paystatus">
+          <mxGeometry x="0" y="40" width="160" height="35" as="geometry" />
+        </mxCell>
+
+        <mxCell id="en-paymethod" value="&lt;&lt;enum&gt;&gt;&#xa;PaymentMethod" style="swimlane;fontStyle=3;align=center;startSize=40;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="700" y="760" width="180" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="en-paymethod-v" value="MOMO&#xa;BANK_TRANSFER" style="text;html=1;align=left;verticalAlign=top;spacingLeft=10;" vertex="1" parent="en-paymethod">
+          <mxGeometry x="0" y="40" width="180" height="35" as="geometry" />
+        </mxCell>
+
+        <mxCell id="en-tier" value="&lt;&lt;enum&gt;&gt;&#xa;MemberTier" style="swimlane;fontStyle=3;align=center;startSize=40;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="40" y="520" width="160" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="en-tier-v" value="BRONZE&#xa;SILVER&#xa;GOLD&#xa;DIAMOND&#xa;VIP" style="text;html=1;align=left;verticalAlign=top;spacingLeft=10;" vertex="1" parent="en-tier">
+          <mxGeometry x="0" y="40" width="160" height="65" as="geometry" />
+        </mxCell>
+
+        <mxCell id="en-amenity" value="&lt;&lt;enum&gt;&gt;&#xa;Amenity" style="swimlane;fontStyle=3;align=center;startSize=40;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="900" y="540" width="180" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="en-amenity-v" value="WIFI&#xa;AC&#xa;TV&#xa;MINIBAR&#xa;JACUZZI&#xa;BREAKFAST&#xa;BUTLER&#xa;POOL&#xa;GYM&#xa;SPA" style="text;html=1;align=left;verticalAlign=top;spacingLeft=10;" vertex="1" parent="en-amenity">
+          <mxGeometry x="0" y="40" width="180" height="155" as="geometry" />
+        </mxCell>
+
+        <!-- ========== Relationships ========== -->
+        <!-- User 1..* Booking -->
+        <mxCell id="rel-ub" value="1" style="endArrow=ERmany;startArrow=ERone;edgeStyle=orthogonalEdgeStyle;fontSize=12;fontStyle=1;" edge="1" source="cls-user" target="cls-booking" parent="1">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="270" y="200"/><mxPoint x="430" y="200"/></Array></mxGeometry>
+        </mxCell>
+
+        <!-- Room 1..* Booking -->
+        <mxCell id="rel-rb" value="1" style="endArrow=ERmany;startArrow=ERone;edgeStyle=orthogonalEdgeStyle;fontSize=12;fontStyle=1;" edge="1" source="cls-room" target="cls-booking" parent="1">
+          <mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="900" y="200"/><mxPoint x="700" y="200"/></Array></mxGeometry>
+        </mxCell>
+
+        <!-- Booking -- Voucher (text ref) -->
+        <mxCell id="rel-bv" value="voucherCode&#xa;(text ref)" style="dashed=1;endArrow=open;edgeStyle=orthogonalEdgeStyle;fontSize=9;" edge="1" source="cls-booking" target="cls-voucher" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- User uses Role enum -->
+        <mxCell id="rel-ur" value="" style="dashed=1;endArrow=open;fontSize=9;" edge="1" source="cls-user" target="en-role" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="rel-ut" value="" style="dashed=1;endArrow=open;fontSize=9;" edge="1" source="cls-user" target="en-tier" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="rel-rrt" value="" style="dashed=1;endArrow=open;fontSize=9;" edge="1" source="cls-room" target="en-roomtype" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="rel-rrs" value="" style="dashed=1;endArrow=open;fontSize=9;" edge="1" source="cls-room" target="en-roomstatus" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="rel-bbs" value="" style="dashed=1;endArrow=open;fontSize=9;" edge="1" source="cls-booking" target="en-bkstatus" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="rel-bps" value="" style="dashed=1;endArrow=open;fontSize=9;" edge="1" source="cls-booking" target="en-paystatus" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="rel-bpm" value="" style="dashed=1;endArrow=open;fontSize=9;" edge="1" source="cls-booking" target="en-paymethod" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="rel-ram" value="" style="dashed=1;endArrow=open;fontSize=9;" edge="1" source="cls-room" target="en-amenity" parent="1"><mxGeometry relative="1" as="geometry"/></mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
